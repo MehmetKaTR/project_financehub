@@ -54,6 +54,7 @@ public class Payment extends BaseEntity {
     private String currency;
 
     @NotNull
+    @Enumerated(EnumType.STRING)
     @Column(nullable=false)
     private PaymentStatus status;
 
@@ -66,11 +67,10 @@ public class Payment extends BaseEntity {
     @Column(name="executed_at",nullable=true)
     private LocalDateTime executedAt;
 
-}
-
-enum PaymentStatus {
-    PENDING,
-    COMPLETED,
-    FAILED,
-    CANCELED
+    public enum PaymentStatus {
+        PENDING,
+        COMPLETED,
+        FAILED,
+        CANCELED
+    }
 }

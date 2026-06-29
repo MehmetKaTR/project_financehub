@@ -38,6 +38,7 @@ public class Budget extends BaseEntity {
     private Category category;
 
     @NotNull
+    @Enumerated(EnumType.STRING)
     private PeriodType period;
 
     @Max(12)
@@ -59,10 +60,10 @@ public class Budget extends BaseEntity {
     @Column(name = "spend_amount",  precision = 19, scale = 4, nullable = false)
     private BigDecimal spendAmount;
 
+    public enum PeriodType {
+        YEARLY,
+        MONTHLY,
+        DAILY
+    }
 }
 
-enum PeriodType {
-    YEARLY,
-    MONTHLY,
-    DAILY
-}

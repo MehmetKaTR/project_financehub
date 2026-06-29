@@ -45,6 +45,7 @@ public class Transaction extends JCreatedEntity {
     private String currency;
 
     @NotNull
+    @Enumerated(EnumType.STRING)
     @Column(name="transaction_type", nullable = false)
     private TransactionTypes transactionType;
 
@@ -53,10 +54,13 @@ public class Transaction extends JCreatedEntity {
 
     @Column(name="reference_number", length = 100, nullable = true)
     private String referenceNumber;
+
+    public enum TransactionTypes{
+        INCOME,
+        EXPENSE,
+        TRANSFER
+    }
+
 }
 
-enum TransactionTypes{
-    INCOME,
-    EXPENSE,
-    TRANSFER
-}
+

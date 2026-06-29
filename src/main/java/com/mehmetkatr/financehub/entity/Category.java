@@ -14,7 +14,7 @@ import lombok.*;
 @EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "categories", indexes = {
-        @Index(name = "idx_categories_category_type", columnList = "category_type")
+        @Index(name = "idx_categories_type", columnList = "type")
 })
 public class Category extends JCreatedEntity {
 
@@ -28,6 +28,7 @@ public class Category extends JCreatedEntity {
     private String name;
 
     @NotNull
+    @Enumerated(EnumType.STRING)
     private CategoryType type;
 
     @Column(length = 50, nullable = true)
@@ -38,9 +39,10 @@ public class Category extends JCreatedEntity {
 
     @Column(name = "is_default")
     private boolean isDefault = true;
+
+    public enum CategoryType {
+        INCOME,
+        EXPENSE,
+    }
 }
 
-enum CategoryType {
-    INCOME,
-    EXPENSE,
-}

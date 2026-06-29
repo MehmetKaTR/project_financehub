@@ -49,17 +49,19 @@ public class BankAccount extends BaseEntity {
     private BigDecimal balance = BigDecimal.ZERO;
 
     @NotNull
+    @Enumerated(EnumType.STRING)
     @Column(name = "account_type", nullable = false)
     private AccountType accountType;
 
     @Column(name = "is_active")
     private boolean isActive = true;
 
+    public enum AccountType {
+        CHECKING,
+        SAVINGS,
+        CREDIT,
+        INVESTMENT
+    }
 }
 
-enum AccountType {
-    CHECKING,
-    SAVINGS,
-    CREDIT,
-    INVESTMENT
-}
+
