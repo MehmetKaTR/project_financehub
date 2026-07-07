@@ -13,4 +13,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     List<Transaction> findByTransactionType(Transaction.TransactionTypes transactionType);
 
+    boolean existsByReferenceNumber(String referenceNumber);
+
 }

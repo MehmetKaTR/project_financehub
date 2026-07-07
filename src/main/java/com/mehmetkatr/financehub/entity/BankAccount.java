@@ -37,7 +37,7 @@ public class BankAccount extends BaseEntity {
     @Column(name="bank_account_number", length = 20)
     private String bankAccountNumber;
 
-    @Column(length = 20)
+    @Column(length = 34)
     private String iban;
 
     @NotBlank
