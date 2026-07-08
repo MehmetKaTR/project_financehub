@@ -33,6 +33,7 @@ public class UserService {
         return userRepository.findByPhone(phone);
     }
 
+    @Transactional
     public User registerUser(String fullName, String email, String rawPassword, String phone) {
         if (userRepository.findByEmail(email).isPresent()) {
             throw new RuntimeException("Email already exists");
@@ -56,6 +57,21 @@ public class UserService {
         System.out.println("Generated JWT for new user: " + jwt);
 
         return savedUser;
+    }
+
+    @Transactional
+    public String loginUser(String email, String rawPassword){
+
+        Optional<User> existingUser = userRepository.findByEmail(email);
+        if(!existingUser.isPresent())
+            throw new RuntimeException("Invalid email or password");
+
+        User user = existingUser.get();
+
+        if(!passwordEncoder.matches(rawPassword, user.getPasswordHash()))
+            throw new RuntimeException("Invalid email or password");
+
+        return tokenService.generateToken(user.getEmail(), user.getFullName());
     }
 
     @Transactional
