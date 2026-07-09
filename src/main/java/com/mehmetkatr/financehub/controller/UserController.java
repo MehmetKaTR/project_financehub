@@ -1,6 +1,7 @@
 package com.mehmetkatr.financehub.controller;
 
 import com.mehmetkatr.financehub.dto.RegisterRequest;
+import com.mehmetkatr.financehub.dto.UserResponse;
 import com.mehmetkatr.financehub.entity.User;
 import com.mehmetkatr.financehub.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<User> createUser(@RequestBody RegisterRequest request){
+    public ResponseEntity<UserResponse> createUser(@RequestBody RegisterRequest request){
 
         User newUser = userService.registerUser(
                 request.getFullName(),
@@ -26,17 +27,33 @@ public class UserController {
                 request.getPhone()
         );
 
-        return ResponseEntity.ok(newUser);
+        UserResponse wrappedUser = new UserResponse();
+        wrappedUser.setEmail(newUser.getEmail());
+        wrappedUser.setFullName(newUser.getFullName());
+        wrappedUser.setPhone(newUser.getPhone());
+        wrappedUser.setActive(newUser.getIsActive());
 
+        return ResponseEntity.ok(wrappedUser);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id){
-        Optional<User> user = userService.findById(id);
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id){
+        Optional<User> userOptional = userService.findById(id);
 
-        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        User user = userOptional.get();
+
+        UserResponse wrappedUser = new UserResponse();
+        wrappedUser.setEmail(user.getEmail());
+        wrappedUser.setFullName(user.getFullName());
+        wrappedUser.setPhone(user.getPhone());
+        wrappedUser.setActive(user.getIsActive());
+
+        return ResponseEntity.ok(wrappedUser);
     }
-
 
 
 
