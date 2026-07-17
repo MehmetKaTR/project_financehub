@@ -1,6 +1,6 @@
 package com.mehmetkatr.financehub.controller;
 
-import com.mehmetkatr.financehub.dto.TransferMoneyRequest;
+import com.mehmetkatr.financehub.dto.request.TransferMoneyRequest;
 import com.mehmetkatr.financehub.entity.Payment;
 import com.mehmetkatr.financehub.service.PaymentService;
 import lombok.RequiredArgsConstructor;

@@ -1,11 +1,10 @@
 package com.mehmetkatr.financehub.controller;
 
-import com.mehmetkatr.financehub.dto.TransactionRequest;
+import com.mehmetkatr.financehub.dto.request.TransactionRequest;
 import com.mehmetkatr.financehub.entity.Transaction;
 import com.mehmetkatr.financehub.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

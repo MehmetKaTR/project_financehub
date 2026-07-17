@@ -1,4 +1,4 @@
-package com.mehmetkatr.financehub.dto;
+package com.mehmetkatr.financehub.dto.request;
 
 import com.mehmetkatr.financehub.entity.BankAccount;
 import lombok.Data;

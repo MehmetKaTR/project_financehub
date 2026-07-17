@@ -1,7 +1,7 @@
 package com.mehmetkatr.financehub.controller;
 
-import com.mehmetkatr.financehub.dto.LoginRequest;
-import com.mehmetkatr.financehub.dto.LoginResponse;
+import com.mehmetkatr.financehub.dto.request.LoginRequest;
+import com.mehmetkatr.financehub.dto.response.LoginResponse;
 import com.mehmetkatr.financehub.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

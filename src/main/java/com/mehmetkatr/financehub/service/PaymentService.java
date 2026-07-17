@@ -8,6 +8,7 @@ import com.mehmetkatr.financehub.repository.BankAccountRepository;
 import com.mehmetkatr.financehub.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -23,7 +24,7 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
 
-
+    @Transactional
     public Payment transferMoney(Long accountId, String toIban, String toName,
                                  BigDecimal amount, String currency,
                                  String addressType, String addressValue){

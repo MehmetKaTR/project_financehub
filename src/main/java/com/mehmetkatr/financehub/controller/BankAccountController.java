@@ -1,10 +1,9 @@
 package com.mehmetkatr.financehub.controller;
 
-import com.mehmetkatr.financehub.dto.CreateBankAccountRequest;
+import com.mehmetkatr.financehub.dto.request.CreateBankAccountRequest;
 import com.mehmetkatr.financehub.entity.BankAccount;
 import com.mehmetkatr.financehub.service.BankAccountService;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

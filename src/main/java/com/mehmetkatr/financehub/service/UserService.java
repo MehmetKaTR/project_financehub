@@ -1,6 +1,7 @@
 package com.mehmetkatr.financehub.service;
 
 import com.mehmetkatr.financehub.entity.User;
+import com.mehmetkatr.financehub.exception.ResourceAlreadyExistsException;
 import com.mehmetkatr.financehub.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,11 +37,11 @@ public class UserService {
     @Transactional
     public User registerUser(String fullName, String email, String rawPassword, String phone) {
         if (userRepository.findByEmail(email).isPresent()) {
-            throw new RuntimeException("Email already exists");
+            throw new ResourceAlreadyExistsException("Email already exists");
         }
 
         if (userRepository.findByPhone(phone).isPresent()) {
-            throw new RuntimeException("Phone already exists");
+            throw new ResourceAlreadyExistsException("Phone already exists");
         }
 
         User user = User.builder()
@@ -52,9 +53,6 @@ public class UserService {
                 .build();
 
         User savedUser = userRepository.save(user);
-
-        String jwt = tokenService.generateToken(savedUser.getEmail(), savedUser.getFullName());
-        System.out.println("Generated JWT for new user: " + jwt);
 
         return savedUser;
     }

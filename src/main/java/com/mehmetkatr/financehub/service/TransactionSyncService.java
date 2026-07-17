@@ -4,11 +4,12 @@ import com.mehmetkatr.financehub.dto.qnb.QnbTransactionDto;
 import com.mehmetkatr.financehub.entity.BankAccount;
 import com.mehmetkatr.financehub.dto.qnb.QnbStatementResponse;
 import com.mehmetkatr.financehub.entity.Transaction;
+import com.mehmetkatr.financehub.exception.ResourceNotFoundException;
 import com.mehmetkatr.financehub.repository.BankAccountRepository;
 import com.mehmetkatr.financehub.repository.TransactionRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -25,7 +26,7 @@ public class TransactionSyncService {
     public int syncDay(Long bankAccountId, LocalDate day){
 
         BankAccount account = bankAccountRepository.findById(bankAccountId)
-                .orElseThrow(() -> new RuntimeException("Account not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
 
         QnbStatementResponse resp = qnbApiService.getStatement(
                 account.getIban(),
@@ -56,6 +57,9 @@ public class TransactionSyncService {
 
         // hesap bakiyesini bankadaki guncel degere cek
         account.setBalance(new BigDecimal(resp.getAccountBalance()));
+
+        bankAccountRepository.save(account);
+
         return imported;
     }
 

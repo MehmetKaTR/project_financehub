@@ -1,7 +1,7 @@
 package com.mehmetkatr.financehub.controller;
 
-import com.mehmetkatr.financehub.dto.RegisterRequest;
-import com.mehmetkatr.financehub.dto.UserResponse;
+import com.mehmetkatr.financehub.dto.request.RegisterRequest;
+import com.mehmetkatr.financehub.dto.response.UserResponse;
 import com.mehmetkatr.financehub.entity.User;
 import com.mehmetkatr.financehub.service.UserService;
 import lombok.RequiredArgsConstructor;

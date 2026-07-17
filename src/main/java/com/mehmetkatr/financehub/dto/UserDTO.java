@@ -1,8 +1,0 @@
-package com.mehmetkatr.financehub.dto;
-
-public class UserDTO {
-
-    private String email;
-    private String fullName;
-    private String phone;
-}
