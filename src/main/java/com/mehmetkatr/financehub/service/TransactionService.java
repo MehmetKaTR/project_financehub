@@ -1,5 +1,6 @@
 package com.mehmetkatr.financehub.service;
 
+import com.mehmetkatr.financehub.dto.response.TransactionResponse;
 import com.mehmetkatr.financehub.entity.BankAccount;
 import com.mehmetkatr.financehub.entity.Category;
 import com.mehmetkatr.financehub.entity.Transaction;
@@ -24,12 +25,12 @@ public class TransactionService {
     private final CategoryRepository categoryRepository;
     private final BudgetService budgetService;
 
-    public List<Transaction> findByBankAccountId(Long bankAccountId) {
-        return transactionRepository.findByBankAccountId(bankAccountId);
+    public List<TransactionResponse> findByBankAccountId(Long bankAccountId) {
+        return transactionRepository.findByBankAccountId(bankAccountId).stream().map(this::toResponse).toList();
     }
 
     @Transactional
-    public Transaction createTransaction(Long bankAccountId, Long categoryId, BigDecimal amount, String currency, Transaction.TransactionTypes transactionTypes, String description){
+    public TransactionResponse createTransaction(Long bankAccountId, Long categoryId, BigDecimal amount, String currency, Transaction.TransactionTypes transactionTypes, String description){
 
         BankAccount bankAccount = bankAccountRepository.findById(bankAccountId)
                 .orElseThrow(() -> new ResourceNotFoundException("Bank Account not found"));
@@ -56,7 +57,24 @@ public class TransactionService {
                     amount
             );
 
-        return newTransaction;
+        return toResponse(newTransaction);
+    }
+
+    // convert Transaction to TransactionResponse
+    private TransactionResponse toResponse(Transaction transaction) {
+        TransactionResponse response = new TransactionResponse();
+        response.setId(transaction.getId());
+        response.setBankAccountId(transaction.getBankAccount().getId());
+        if (transaction.getCategory() != null) {
+            response.setCategoryId(transaction.getCategory().getId());
+        }
+        response.setAmount(transaction.getAmount());
+        response.setCurrency(transaction.getCurrency());
+        response.setType(transaction.getTransactionType());
+        response.setDescription(transaction.getDescription());
+        response.setReferenceNumber(transaction.getReferenceNumber());
+
+        return response;
     }
 
 }

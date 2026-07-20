@@ -2,6 +2,7 @@ package com.mehmetkatr.financehub.service;
 
 import com.mehmetkatr.financehub.dto.qnb.QnbMoneyTransferRequest;
 import com.mehmetkatr.financehub.dto.qnb.QnbMoneyTransferResponse;
+import com.mehmetkatr.financehub.dto.response.PaymentResponse;
 import com.mehmetkatr.financehub.entity.BankAccount;
 import com.mehmetkatr.financehub.entity.Payment;
 import com.mehmetkatr.financehub.repository.BankAccountRepository;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,9 +25,9 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
 
     @Transactional
-    public Payment transferMoney(Long accountId, String toIban, String toName,
-                                 BigDecimal amount, String currency,
-                                 String addressType, String addressValue){
+    public PaymentResponse transferMoney(Long accountId, String toIban, String toName,
+                                         BigDecimal amount, String currency,
+                                         String addressType, String addressValue){
 
         BankAccount updatedAccount = bankAccountService.withdraw(accountId, amount);
 
@@ -70,7 +70,25 @@ public class PaymentService {
         }
         paymentRepository.save(payment);
 
-        return payment;
+        return toResponse(payment);
+    }
+
+    // convert Payment to PaymentResponse
+    private PaymentResponse toResponse(Payment payment) {
+        PaymentResponse response = new PaymentResponse();
+        response.setId(payment.getId());
+        response.setUserId(payment.getUser().getId());
+        response.setBankAccountId(payment.getBankAccount().getId());
+        response.setToIban(payment.getToIban());
+        response.setToName(payment.getToName());
+        response.setAmount(payment.getAmount());
+        response.setCurrency(payment.getCurrency());
+        response.setStatus(payment.getStatus());
+        response.setDescription(payment.getDescription());
+        response.setScheduledDate(payment.getScheduledDate());
+        response.setExecutedAt(payment.getExecutedAt());
+
+        return response;
     }
 
 }

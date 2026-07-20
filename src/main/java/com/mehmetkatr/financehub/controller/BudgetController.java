@@ -1,6 +1,7 @@
 package com.mehmetkatr.financehub.controller;
 
 import com.mehmetkatr.financehub.dto.request.BudgetRequest;
+import com.mehmetkatr.financehub.dto.response.BudgetResponse;
 import com.mehmetkatr.financehub.entity.Budget;
 import com.mehmetkatr.financehub.service.BudgetService;
 import lombok.RequiredArgsConstructor;
@@ -17,9 +18,9 @@ public class BudgetController {
     private final BudgetService budgetService;
 
     @PostMapping
-    public ResponseEntity<Budget> createBudget(@RequestBody BudgetRequest request){
+    public ResponseEntity<BudgetResponse> createBudget(@RequestBody BudgetRequest request){
 
-        Budget newBudget = budgetService.createBudget(
+        BudgetResponse newBudget = budgetService.createBudget(
                 request.getUserId(),
                 request.getCategoryId(),
                 request.getPeriodType(),
@@ -32,9 +33,9 @@ public class BudgetController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Budget>> findByUserId(@PathVariable Long userId){
+    public ResponseEntity<List<BudgetResponse>> findByUserId(@PathVariable Long userId){
 
-        List<Budget> budget = budgetService.findByUserId(userId);
+        List<BudgetResponse> budget = budgetService.findByUserId(userId);
 
         return ResponseEntity.ok(budget);
     }

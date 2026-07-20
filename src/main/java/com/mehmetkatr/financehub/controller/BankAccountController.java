@@ -1,7 +1,7 @@
 package com.mehmetkatr.financehub.controller;
 
 import com.mehmetkatr.financehub.dto.request.CreateBankAccountRequest;
-import com.mehmetkatr.financehub.entity.BankAccount;
+import com.mehmetkatr.financehub.dto.response.BankAccountResponse;
 import com.mehmetkatr.financehub.service.BankAccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +19,8 @@ public class BankAccountController {
     private final BankAccountService bankAccountService;
 
     @PostMapping
-    public ResponseEntity<BankAccount> createBankAccount(@RequestBody CreateBankAccountRequest request){
-        BankAccount newBankAccount = bankAccountService.createBankAccount(
+    public ResponseEntity<BankAccountResponse> createBankAccount(@RequestBody CreateBankAccountRequest request){
+        BankAccountResponse newBankAccount = bankAccountService.createBankAccount(
                 request.getUserId(),
                 request.getBankName(),
                 request.getBankAccountNumber(),
@@ -34,48 +34,48 @@ public class BankAccountController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<BankAccount> getAccountInfoById(@PathVariable Long id) {
-        Optional<BankAccount> bankAccount = bankAccountService.findById(id);
+    public ResponseEntity<BankAccountResponse> getAccountInfoById(@PathVariable Long id) {
+        Optional<BankAccountResponse> bankAccount = bankAccountService.findById(id);
 
         return bankAccount.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<BankAccount>> getAccountInfoByUserId(@PathVariable Long userId){
+    public ResponseEntity<List<BankAccountResponse>> getAccountInfoByUserId(@PathVariable Long userId){
 
-        List<BankAccount> bankAccounts = bankAccountService.findByUserId(userId);
+        List<BankAccountResponse> bankAccounts = bankAccountService.findByUserId(userId);
 
         return ResponseEntity.ok(bankAccounts);
     }
 
     @PostMapping("/{id}/deposit")
-    public ResponseEntity<BankAccount> processDeposit(@PathVariable Long id, @RequestParam BigDecimal amount){
+    public ResponseEntity<BankAccountResponse> processDeposit(@PathVariable Long id, @RequestParam BigDecimal amount){
 
-        BankAccount bankAccount = bankAccountService.deposit(id, amount);
+        BankAccountResponse bankAccount = bankAccountService.deposit(id, amount);
 
         return ResponseEntity.ok(bankAccount);
     }
 
     @PostMapping("/{id}/withdraw")
-    public ResponseEntity<BankAccount> processWithdraw(@PathVariable Long id, @RequestParam BigDecimal amount){
+    public ResponseEntity<BankAccountResponse> processWithdraw(@PathVariable Long id, @RequestParam BigDecimal amount){
 
-        BankAccount bankAccount = bankAccountService.withdraw(id, amount);
+        BankAccountResponse bankAccount = bankAccountService.withdrawForApi(id, amount);
 
         return ResponseEntity.ok(bankAccount);
     }
 
     @PostMapping("/{id}/activate")
-    public ResponseEntity<BankAccount> activateBankAccount(@PathVariable Long id){
+    public ResponseEntity<BankAccountResponse> activateBankAccount(@PathVariable Long id){
 
-        BankAccount bankAccount = bankAccountService.activateAccount(id);
+        BankAccountResponse bankAccount = bankAccountService.activateAccount(id);
 
         return ResponseEntity.ok(bankAccount);
     }
 
     @PostMapping("/{id}/deactivate")
-    public ResponseEntity<BankAccount> deactivateBankAccount(@PathVariable Long id){
+    public ResponseEntity<BankAccountResponse> deactivateBankAccount(@PathVariable Long id){
 
-        BankAccount bankAccount = bankAccountService.deactivateAccount(id);
+        BankAccountResponse bankAccount = bankAccountService.deactivateAccount(id);
 
         return ResponseEntity.ok(bankAccount);
     }

@@ -1,5 +1,6 @@
 package com.mehmetkatr.financehub.service;
 
+import com.mehmetkatr.financehub.dto.response.BankAccountResponse;
 import com.mehmetkatr.financehub.entity.BankAccount;
 import com.mehmetkatr.financehub.entity.User;
 import com.mehmetkatr.financehub.exception.ResourceNotFoundException;
@@ -20,24 +21,24 @@ public class BankAccountService {
     private final BankAccountRepository bankAccountRepository;
     private final UserRepository userRepository;
 
-    public Optional<BankAccount> findById(Long id){
-        return bankAccountRepository.findById(id);
+    public Optional<BankAccountResponse> findById(Long id){
+        return bankAccountRepository.findById(id).map(this::toResponse);
     }
 
-    public List<BankAccount> findByUserId(Long id){
-        return bankAccountRepository.findByUserId(id);
+    public List<BankAccountResponse> findByUserId(Long id){
+        return bankAccountRepository.findByUserId(id).stream().map(this::toResponse).toList();
     }
 
-    public List<BankAccount> findByBankName(String bankName) {
+    public List<BankAccountResponse> findByBankName(String bankName) {
 
-        return bankAccountRepository.findByBankName(bankName);
+        return bankAccountRepository.findByBankName(bankName).stream().map(this::toResponse).toList();
     }
 
-    public List<BankAccount> findByAccountType(BankAccount.AccountType type){
-        return bankAccountRepository.findByAccountType(type);
+    public List<BankAccountResponse> findByAccountType(BankAccount.AccountType type){
+        return bankAccountRepository.findByAccountType(type).stream().map(this::toResponse).toList();
     }
 
-    public BankAccount createBankAccount(Long userId, String bankName, String bankAccountNumber, String iban, String currency, BigDecimal balance, BankAccount.AccountType type){
+    public BankAccountResponse createBankAccount(Long userId, String bankName, String bankAccountNumber, String iban, String currency, BigDecimal balance, BankAccount.AccountType type){
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -53,28 +54,35 @@ public class BankAccountService {
                 .isActive(true)
                 .build();
 
-        return bankAccountRepository.save(newBankAccount);
+        bankAccountRepository.save(newBankAccount);
+
+        return toResponse(newBankAccount);
     }
 
-    public BankAccount activateAccount(Long id){
+    public BankAccountResponse activateAccount(Long id){
         BankAccount currentBankAccount = bankAccountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Bank Account not found"));
 
         if(!currentBankAccount.isActive())
             currentBankAccount.setActive(true);
 
-        return bankAccountRepository.save(currentBankAccount);
+        bankAccountRepository.save(currentBankAccount);
+
+        return toResponse(currentBankAccount);
     }
 
-    public BankAccount deactivateAccount(Long id){
+    public BankAccountResponse deactivateAccount(Long id){
         BankAccount currentBankAccount = bankAccountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Bank Account not found"));
 
         if(currentBankAccount.isActive())
             currentBankAccount.setActive(false);
 
-        return bankAccountRepository.save(currentBankAccount);
+        bankAccountRepository.save(currentBankAccount);
+
+        return toResponse(currentBankAccount);
     }
 
-    public BankAccount deposit(Long accountId, BigDecimal amount){
+    @Transactional
+    public BankAccountResponse deposit(Long accountId, BigDecimal amount){
         BankAccount currentBankAccount = bankAccountRepository.findById(accountId)
                 .orElseThrow(() -> new ResourceNotFoundException("Bank account not found"));
 
@@ -90,7 +98,7 @@ public class BankAccountService {
         currentBankAccount.setBalance(newBalance);
         bankAccountRepository.save(currentBankAccount);
 
-        return currentBankAccount;
+        return toResponse(currentBankAccount);
     }
 
     @Transactional
@@ -112,10 +120,30 @@ public class BankAccountService {
 
         BigDecimal newBalance = currentBankAccount.getBalance().subtract(amount);
         currentBankAccount.setBalance(newBalance);
-        bankAccountRepository.save(currentBankAccount);
 
-        return currentBankAccount;
+        return bankAccountRepository.save(currentBankAccount);
 
+    }
+
+    @Transactional
+    public BankAccountResponse withdrawForApi(Long accountId, BigDecimal amount) {
+        return toResponse(withdraw(accountId, amount));
+    }
+
+    // convert BankAccount to BankAccountResponse
+    private BankAccountResponse toResponse(BankAccount bankAccount) {
+        BankAccountResponse response = new BankAccountResponse();
+        response.setId(bankAccount.getId());
+        response.setUserId(bankAccount.getUser().getId());
+        response.setBankName(bankAccount.getBankName());
+        response.setBankAccountNumber(bankAccount.getBankAccountNumber());
+        response.setIban(bankAccount.getIban());
+        response.setCurrency(bankAccount.getCurrency());
+        response.setBalance(bankAccount.getBalance());
+        response.setAccountType(bankAccount.getAccountType());
+        response.setActive(bankAccount.isActive());
+
+        return response;
     }
 
 }

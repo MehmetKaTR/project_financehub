@@ -1,7 +1,7 @@
 package com.mehmetkatr.financehub.controller;
 
 import com.mehmetkatr.financehub.dto.request.TransferMoneyRequest;
-import com.mehmetkatr.financehub.entity.Payment;
+import com.mehmetkatr.financehub.dto.response.PaymentResponse;
 import com.mehmetkatr.financehub.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +18,8 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @PostMapping("/transfer")
-    public ResponseEntity<Payment> transferMoney(@RequestBody TransferMoneyRequest request){
-        Payment payment = paymentService.transferMoney(
+    public ResponseEntity<PaymentResponse> transferMoney(@RequestBody TransferMoneyRequest request){
+        PaymentResponse payment = paymentService.transferMoney(
                 request.getAccountId(),
                 request.getToIban(),
                 request.getToName(),

@@ -1,5 +1,6 @@
 package com.mehmetkatr.financehub.service;
 
+import com.mehmetkatr.financehub.dto.response.CategoryResponse;
 import com.mehmetkatr.financehub.entity.Category;
 import com.mehmetkatr.financehub.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,19 +15,19 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
 
-    public Optional<Category> findByName(String name){
-        return categoryRepository.findByName(name);
+    public Optional<CategoryResponse> findByName(String name){
+        return categoryRepository.findByName(name).map(this::toResponse);
     }
 
-    public List<Category> findAll(){
-        return categoryRepository.findAll();
+    public List<CategoryResponse> findAll(){
+        return categoryRepository.findAll().stream().map(this::toResponse).toList();
     }
 
-    public List<Category> findByType(Category.CategoryType type){
-        return  categoryRepository.findByType(type);
+    public List<CategoryResponse> findByType(Category.CategoryType type){
+        return  categoryRepository.findByType(type).stream().map(this::toResponse).toList();
     }
 
-    public Category createCategory(String name, Category.CategoryType type, String icon, String color){
+    public CategoryResponse createCategory(String name, Category.CategoryType type, String icon, String color){
 
         Category newCategory = Category.builder()
                 .name(name)
@@ -35,7 +36,22 @@ public class CategoryService {
                 .color(color)
                 .build();
 
-        return categoryRepository.save(newCategory);
+        categoryRepository.save(newCategory);
+
+        return toResponse(newCategory);
+    }
+
+    // convert Category to CategoryResponse
+    private CategoryResponse toResponse(Category category) {
+        CategoryResponse response = new CategoryResponse();
+        response.setId(category.getId());
+        response.setName(category.getName());
+        response.setType(category.getType());
+        response.setIcon(category.getIcon());
+        response.setColor(category.getColor());
+        response.setDefault(category.isDefault());
+
+        return response;
     }
 
 }

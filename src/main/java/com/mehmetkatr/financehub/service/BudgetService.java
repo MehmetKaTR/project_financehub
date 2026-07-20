@@ -1,5 +1,6 @@
 package com.mehmetkatr.financehub.service;
 
+import com.mehmetkatr.financehub.dto.response.BudgetResponse;
 import com.mehmetkatr.financehub.entity.Budget;
 import com.mehmetkatr.financehub.entity.Category;
 import com.mehmetkatr.financehub.entity.User;
@@ -22,7 +23,7 @@ public class BudgetService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
 
-    public Budget createBudget(Long userId, Long categoryId, Budget.PeriodType periodType, Integer month, Integer year, BigDecimal limitAmount){
+    public BudgetResponse createBudget(Long userId, Long categoryId, Budget.PeriodType periodType, Integer month, Integer year, BigDecimal limitAmount){
 
         User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
@@ -37,12 +38,14 @@ public class BudgetService {
                 .limitAmount(limitAmount)
                 .spendAmount(BigDecimal.ZERO).build();
 
-        return budgetRepository.save(budget);
+        budgetRepository.save(budget);
+
+        return toResponse(budget);
     }
 
-    public List<Budget> findByUserId(Long userId){
+    public List<BudgetResponse> findByUserId(Long userId){
 
-        return budgetRepository.findByUserId(userId);
+        return budgetRepository.findByUserId(userId).stream().map(this::toResponse).toList();
     }
 
     public void addSpending(Long userId, Long categoryId, Integer year, Integer month, BigDecimal amount){
@@ -58,5 +61,21 @@ public class BudgetService {
         budgetRepository.save(budget);
     }
 
+    // convert Budget to BudgetResponse
+    private BudgetResponse toResponse(Budget budget) {
+        BudgetResponse response = new BudgetResponse();
+        response.setId(budget.getId());
+        response.setUserId(budget.getUser().getId());
+        if (budget.getCategory() != null) {
+            response.setCategoryId(budget.getCategory().getId());
+        }
+        response.setPeriod(budget.getPeriod());
+        response.setMonth(budget.getMonth());
+        response.setYear(budget.getYear());
+        response.setLimitAmount(budget.getLimitAmount());
+        response.setSpendAmount(budget.getSpendAmount());
+
+        return response;
+    }
 
 }

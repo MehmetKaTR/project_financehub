@@ -6,10 +6,10 @@ import lombok.Data;
 @Data
 public class CategoryResponse {
 
-    public Long id;
-    public String name;
-    public Category.CategoryType type;
-    public String icon;
-    public String color;
-    public boolean isDefault;
+    private Long id;
+    private String name;
+    private Category.CategoryType type;
+    private String icon;
+    private String color;
+    private boolean isDefault;
 }

@@ -1,5 +1,6 @@
 package com.mehmetkatr.financehub.service;
 
+import com.mehmetkatr.financehub.dto.response.UserResponse;
 import com.mehmetkatr.financehub.entity.User;
 import com.mehmetkatr.financehub.exception.ResourceAlreadyExistsException;
 import com.mehmetkatr.financehub.repository.UserRepository;
@@ -18,24 +19,24 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
 
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public Optional<UserResponse> findByEmail(String email) {
+        return userRepository.findByEmail(email).map(this::toResponse);
     }
 
-    public Optional<User> findByFullName(String fullName) {
-        return userRepository.findByFullName(fullName);
+    public Optional<UserResponse> findByFullName(String fullName) {
+        return userRepository.findByFullName(fullName).map(this::toResponse);
     }
 
-    public Optional<User> findById(Long id) {
-        return userRepository.findById(id);
+    public Optional<UserResponse> findById(Long id) {
+        return userRepository.findById(id).map(this::toResponse);
     }
 
-    public Optional<User> findByPhone(String phone) {
-        return userRepository.findByPhone(phone);
+    public Optional<UserResponse> findByPhone(String phone) {
+        return userRepository.findByPhone(phone).map(this::toResponse);
     }
 
     @Transactional
-    public User registerUser(String fullName, String email, String rawPassword, String phone) {
+    public UserResponse registerUser(String fullName, String email, String rawPassword, String phone) {
         if (userRepository.findByEmail(email).isPresent()) {
             throw new ResourceAlreadyExistsException("Email already exists");
         }
@@ -54,7 +55,7 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
 
-        return savedUser;
+        return toResponse(savedUser);
     }
 
     @Transactional
@@ -92,6 +93,18 @@ public class UserService {
         tokenService.generateToken(savedUser.getEmail(), savedUser.getFullName());
 
         return savedUser;
+    }
+
+    // convert User to UserResponse
+    private UserResponse toResponse(User user) {
+        UserResponse response = new UserResponse();
+        response.setId(user.getId());
+        response.setEmail(user.getEmail());
+        response.setFullName(user.getFullName());
+        response.setPhone(user.getPhone());
+        response.setActive(user.getIsActive());
+
+        return response;
     }
 
 }
