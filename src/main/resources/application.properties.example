@@ -1,0 +1,19 @@
+spring.application.name=financehub
+
+# JWT — en az 32 karakterlik gizli bir anahtar kullanin
+jwt.secret=CHANGE_ME_SECRET_KEY_AT_LEAST_32_CHARS
+jwt.expiration-ms=86400000
+
+# Oracle (Docker: gvenzl/oracle-free)
+spring.datasource.url=jdbc:oracle:thin:@localhost:1521/FREEPDB1
+spring.datasource.username=SYSTEM
+spring.datasource.password=CHANGE_ME_DB_PASSWORD
+spring.datasource.driver-class-name=oracle.jdbc.OracleDriver
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.OracleDialect
+
+# QNB Open Banking (sandbox) — token'i mailden aldigin degerle degistir
+qnb.api.base-url=https://sandbox-api.qnb.com.tr
+qnb.api.token=CHANGE_ME_QNB_TOKEN
