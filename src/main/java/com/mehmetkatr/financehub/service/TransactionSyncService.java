@@ -1,5 +1,6 @@
 package com.mehmetkatr.financehub.service;
 
+import com.mehmetkatr.financehub.domain.Money;
 import com.mehmetkatr.financehub.dto.qnb.QnbTransactionDto;
 import com.mehmetkatr.financehub.entity.BankAccount;
 import com.mehmetkatr.financehub.dto.qnb.QnbStatementResponse;
@@ -56,7 +57,7 @@ public class TransactionSyncService {
         }
 
         // hesap bakiyesini bankadaki guncel degere cek
-        account.setBalance(new BigDecimal(resp.getAccountBalance()));
+        account.setBalance(new Money(new BigDecimal(resp.getAccountBalance()), account.getBalance().getCurrency()));
 
         bankAccountRepository.save(account);
 

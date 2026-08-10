@@ -1,5 +1,6 @@
 package com.mehmetkatr.financehub.service;
 
+import com.mehmetkatr.financehub.domain.Money;
 import com.mehmetkatr.financehub.dto.qnb.QnbMoneyTransferRequest;
 import com.mehmetkatr.financehub.dto.qnb.QnbMoneyTransferResponse;
 import com.mehmetkatr.financehub.dto.response.PaymentResponse;
@@ -61,7 +62,7 @@ class PaymentServiceTest {
         when(qnbApiService.transferMoney(any(QnbMoneyTransferRequest.class))).thenReturn(qnbCevap("000"));
 
         PaymentResponse sonuc = paymentService.transferMoney(
-                1L, "TR123", "Alici", new BigDecimal("100"), "TRY", null, null);
+                1L, "TR123", "Alici", new Money(new BigDecimal("100"), "TRY"), null, null);
 
         assertThat(sonuc.getStatus()).isEqualTo(Payment.PaymentStatus.COMPLETED);
     }
@@ -72,7 +73,7 @@ class PaymentServiceTest {
         when(qnbApiService.transferMoney(any(QnbMoneyTransferRequest.class))).thenReturn(qnbCevap("998"));
 
         PaymentResponse sonuc = paymentService.transferMoney(
-                1L, "TR123", "Alici", new BigDecimal("100"), "TRY", null, null);
+                1L, "TR123", "Alici", new Money(new BigDecimal("100"), "TRY"), null, null);
 
         assertThat(sonuc.getStatus()).isEqualTo(Payment.PaymentStatus.COMPLETED);
     }
@@ -83,7 +84,7 @@ class PaymentServiceTest {
         when(qnbApiService.transferMoney(any(QnbMoneyTransferRequest.class))).thenReturn(qnbCevap("007"));
 
         PaymentResponse sonuc = paymentService.transferMoney(
-                1L, "TR123", "Alici", new BigDecimal("100"), "TRY", null, null);
+                1L, "TR123", "Alici", new Money(new BigDecimal("100"), "TRY"), null, null);
 
         assertThat(sonuc.getStatus()).isEqualTo(Payment.PaymentStatus.FAILED);
     }
@@ -94,7 +95,7 @@ class PaymentServiceTest {
         when(qnbApiService.transferMoney(any(QnbMoneyTransferRequest.class))).thenReturn(qnbCevap("000"));
 
         paymentService.transferMoney(
-                1L, "TR123", "Alici", new BigDecimal("100"), "TRY", null, null);
+                1L, "TR123", "Alici", new Money(new BigDecimal("100"), "TRY"), null, null);
 
         // bakiye dusme adimi (withdraw) gercekten cagrildi mi?
         verify(bankAccountService).withdraw(1L, new BigDecimal("100"));

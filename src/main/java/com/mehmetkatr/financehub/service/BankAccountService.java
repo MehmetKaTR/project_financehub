@@ -1,5 +1,6 @@
 package com.mehmetkatr.financehub.service;
 
+import com.mehmetkatr.financehub.domain.Money;
 import com.mehmetkatr.financehub.dto.response.BankAccountResponse;
 import com.mehmetkatr.financehub.entity.BankAccount;
 import com.mehmetkatr.financehub.entity.User;
@@ -38,7 +39,7 @@ public class BankAccountService {
         return bankAccountRepository.findByAccountType(type).stream().map(this::toResponse).toList();
     }
 
-    public BankAccountResponse createBankAccount(Long userId, String bankName, String bankAccountNumber, String iban, String currency, BigDecimal balance, BankAccount.AccountType type){
+    public BankAccountResponse createBankAccount(Long userId, String bankName, String bankAccountNumber, String iban, Money balance, BankAccount.AccountType type){
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -48,7 +49,6 @@ public class BankAccountService {
                 .bankName(bankName)
                 .bankAccountNumber(bankAccountNumber)
                 .iban(iban)
-                .currency(currency)
                 .balance(balance)
                 .accountType(type)
                 .isActive(true)
@@ -83,46 +83,24 @@ public class BankAccountService {
 
     @Transactional
     public BankAccountResponse deposit(Long accountId, BigDecimal amount){
-        BankAccount currentBankAccount = bankAccountRepository.findById(accountId)
-                .orElseThrow(() -> new ResourceNotFoundException("Bank account not found"));
+        BankAccount account = bankAccountRepository.findById(accountId).orElseThrow(() -> new ResourceNotFoundException("Bank account not found"));
 
-        if (!currentBankAccount.isActive()) {
-            throw new RuntimeException("Bank account is not active");
-        }
+        Money balance = new Money(amount, account.getBalance().getCurrency());
+        account.deposit(balance);
 
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new RuntimeException("Deposit amount must be positive");
-        }
-
-        BigDecimal newBalance = currentBankAccount.getBalance().add(amount);
-        currentBankAccount.setBalance(newBalance);
-        bankAccountRepository.save(currentBankAccount);
-
-        return toResponse(currentBankAccount);
+        bankAccountRepository.save(account);
+        return toResponse(account);
     }
 
     @Transactional
-    public BankAccount withdraw(Long accountId,BigDecimal amount){
-        BankAccount currentBankAccount = bankAccountRepository.findById(accountId)
-                .orElseThrow(() -> new ResourceNotFoundException("Bank account not found"));
+    public BankAccount withdraw(Long accountId, BigDecimal amount){
+        BankAccount account = bankAccountRepository.findById(accountId).orElseThrow(()-> new ResourceNotFoundException("Bank account not found"));
 
-        if (!currentBankAccount.isActive()) {
-            throw new RuntimeException("Bank account is not active");
-        }
+        Money balance = new Money(amount, account.getBalance().getCurrency());
+        account.withdraw(balance);
 
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new RuntimeException("Withdraw amount must be positive");
-        }
-
-        if (currentBankAccount.getBalance().compareTo(amount) < 0) {
-            throw new RuntimeException("Insufficient balance");
-        }
-
-        BigDecimal newBalance = currentBankAccount.getBalance().subtract(amount);
-        currentBankAccount.setBalance(newBalance);
-
-        return bankAccountRepository.save(currentBankAccount);
-
+        bankAccountRepository.save(account);
+        return account;
     }
 
     @Transactional
@@ -138,8 +116,8 @@ public class BankAccountService {
         response.setBankName(bankAccount.getBankName());
         response.setBankAccountNumber(bankAccount.getBankAccountNumber());
         response.setIban(bankAccount.getIban());
-        response.setCurrency(bankAccount.getCurrency());
-        response.setBalance(bankAccount.getBalance());
+        response.setBalance(bankAccount.getBalance().getAmount());
+        response.setCurrency(bankAccount.getBalance().getCurrency());
         response.setAccountType(bankAccount.getAccountType());
         response.setActive(bankAccount.isActive());
 

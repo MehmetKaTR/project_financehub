@@ -1,5 +1,6 @@
 package com.mehmetkatr.financehub.service;
 
+import com.mehmetkatr.financehub.domain.Money;
 import com.mehmetkatr.financehub.dto.response.BankAccountResponse;
 import com.mehmetkatr.financehub.entity.BankAccount;
 import com.mehmetkatr.financehub.entity.User;
@@ -35,9 +36,11 @@ class BankAccountServiceTest {
     @Test
     void withdraw_yetersizBakiye_exceptionFirlatir(){
 
+        Money balance = new Money(new BigDecimal("100"), "TRY");
+
         // 1. ARRANGE (Hazırla) — sahte senaryoyu kur
         BankAccount account = BankAccount.builder()
-                .balance(new BigDecimal("100"))
+                .balance(balance)
                 .isActive(true)
                 .build();
 
@@ -53,8 +56,10 @@ class BankAccountServiceTest {
     @Test
     void withdraw_pasifHesap_exceptionFirlatir(){
 
+        Money balance = new Money(new BigDecimal("200"), "TRY");
+
         BankAccount account = BankAccount.builder()
-                .balance(new BigDecimal("200"))
+                .balance(balance)
                 .isActive(false)
                 .build();
 
@@ -70,16 +75,19 @@ class BankAccountServiceTest {
     @Test
     void withdraw_negatifTutar_ExceptionFirlatir(){
 
+        Money balance = new Money(new BigDecimal("200"), "TRY");
+
         BankAccount account = BankAccount.builder()
-                .balance(new BigDecimal("200"))
+                .balance(balance)
                 .isActive(true)
                 .build();
 
         when(bankAccountRepository.findById(1L)).thenReturn(Optional.of(account));
 
+        // negatif deger artik Money constructor'inda yakalaniyor (value object korumasi)
         assertThatThrownBy(() -> bankAccountService.withdraw(1L, new BigDecimal("-100")))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("Withdraw amount must be positive");
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Para negatif olamaz");
 
     }
 
@@ -87,8 +95,10 @@ class BankAccountServiceTest {
     @Test
     void withdraw_BakiyeHarca_BasariliDus(){
 
+        Money balance = new Money(new BigDecimal("500"), "TRY");
+
         BankAccount account = BankAccount.builder()
-                .balance(new BigDecimal("500"))
+                .balance(balance)
                 .isActive(true)
                 .build();
 
@@ -98,7 +108,7 @@ class BankAccountServiceTest {
 
         BankAccount sonuc = bankAccountService.withdraw(1L, new BigDecimal("200"));
 
-        assertThat(sonuc.getBalance()).isEqualByComparingTo(new BigDecimal("300"));
+        assertThat(sonuc.getBalance().getAmount()).isEqualByComparingTo(new BigDecimal("300"));
     }
 
     // TODO: deposit - basarili durumda bakiyeyi dogru artirir
@@ -107,9 +117,11 @@ class BankAccountServiceTest {
 
         User user = User.builder().build();
 
+        Money balance = new Money(new BigDecimal("500"), "TRY");
+
         BankAccount account = BankAccount.builder()
                 .user(user)
-                .balance(new BigDecimal("500"))
+                .balance(balance)
                 .isActive(true)
                 .build();
 
@@ -128,29 +140,33 @@ class BankAccountServiceTest {
 
         User user = User.builder().build();
 
+        Money balance = new Money(new BigDecimal("500"), "TRY");
+
         BankAccount account = BankAccount.builder()
                 .user(user)
-                .balance(new BigDecimal("500"))
+                .balance(balance)
                 .isActive(true)
                 .build();
 
         // Mocks
         when(bankAccountRepository.findById(1L)).thenReturn(Optional.of(account));
 
+        // negatif deger artik Money constructor'inda yakalaniyor (value object korumasi)
         assertThatThrownBy(() -> bankAccountService.deposit(1L, new BigDecimal("-100")))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("Deposit amount must be positive");
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Para negatif olamaz");
     }
 
     // TODO: createBankAccount - kullanici yoksa ResourceNotFoundException
     @Test
     void createBankAccount_KullaniciYoksa_ResourceNotFoundExceptipn(){
 
+        Money balance = new Money( BigDecimal.ZERO, "TRY");
         //Mocks
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> bankAccountService.createBankAccount(
-                1L, "QNB", "123", "TR123", "TRY", BigDecimal.ZERO, BankAccount.AccountType.CHECKING))
+                1L, "QNB", "123", "TR123", balance, BankAccount.AccountType.CHECKING))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("User not found");
     }

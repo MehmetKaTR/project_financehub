@@ -1,5 +1,6 @@
 package com.mehmetkatr.financehub.controller;
 
+import com.mehmetkatr.financehub.domain.Money;
 import com.mehmetkatr.financehub.dto.request.CreateBankAccountRequest;
 import com.mehmetkatr.financehub.dto.response.BankAccountResponse;
 import com.mehmetkatr.financehub.service.BankAccountService;
@@ -20,13 +21,15 @@ public class BankAccountController {
 
     @PostMapping
     public ResponseEntity<BankAccountResponse> createBankAccount(@RequestBody CreateBankAccountRequest request){
+
+        Money balance = new Money(request.getBalance(), request.getCurrency());
+
         BankAccountResponse newBankAccount = bankAccountService.createBankAccount(
                 request.getUserId(),
                 request.getBankName(),
                 request.getBankAccountNumber(),
                 request.getIban(),
-                request.getCurrency(),
-                request.getBalance(),
+                balance,
                 request.getAccountType()
         );
 

@@ -1,6 +1,7 @@
 package com.mehmetkatr.financehub.entity;
 
 
+import com.mehmetkatr.financehub.domain.Money;
 import com.mehmetkatr.financehub.entity.base.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -40,13 +41,9 @@ public class BankAccount extends BaseEntity {
     @Column(length = 34)
     private String iban;
 
-    @NotBlank
-    @Column(length = 3, nullable = false)
-    private String currency;
-
     @NotNull
-    @Column(precision = 19, scale = 4, nullable = false)
-    private BigDecimal balance = BigDecimal.ZERO;
+    @Embedded
+    private Money balance;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -55,6 +52,30 @@ public class BankAccount extends BaseEntity {
 
     @Column(name = "is_active")
     private boolean isActive = true;
+
+    public void deposit(Money amount){
+        if (!this.isActive) {
+            throw new RuntimeException("Bank account is not active");
+        }
+        if (this.balance.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("Deposit amount must be positive");
+        }
+
+        this.balance = this.balance.add(amount);
+    }
+
+    public void withdraw(Money amount) {
+        if (!this.isActive) {
+            throw new RuntimeException("Bank account is not active");
+        }
+        if (this.balance.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("Withdraw amount must be positive");
+        }
+        if (balance.getAmount().compareTo(amount.getAmount()) < 0) {
+            throw new RuntimeException("Insufficient balance");
+        }
+        this.balance = this.balance.subtract(amount);
+    }
 
     public enum AccountType {
         CHECKING,

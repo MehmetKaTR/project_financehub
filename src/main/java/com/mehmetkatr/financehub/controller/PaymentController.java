@@ -1,5 +1,6 @@
 package com.mehmetkatr.financehub.controller;
 
+import com.mehmetkatr.financehub.domain.Money;
 import com.mehmetkatr.financehub.dto.request.TransferMoneyRequest;
 import com.mehmetkatr.financehub.dto.response.PaymentResponse;
 import com.mehmetkatr.financehub.service.PaymentService;
@@ -19,12 +20,14 @@ public class PaymentController {
 
     @PostMapping("/transfer")
     public ResponseEntity<PaymentResponse> transferMoney(@RequestBody TransferMoneyRequest request){
+
+        Money balance = new Money(request.getAmount(), request.getCurrency());
+
         PaymentResponse payment = paymentService.transferMoney(
                 request.getAccountId(),
                 request.getToIban(),
                 request.getToName(),
-                request.getAmount(),
-                request.getCurrency(),
+                balance,
                 request.getAddressType(),
                 request.getAddressValue()
         );

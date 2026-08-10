@@ -1,5 +1,6 @@
 package com.mehmetkatr.financehub.service;
 
+import com.mehmetkatr.financehub.domain.Money;
 import com.mehmetkatr.financehub.dto.qnb.QnbMoneyTransferRequest;
 import com.mehmetkatr.financehub.dto.qnb.QnbMoneyTransferResponse;
 import com.mehmetkatr.financehub.dto.response.PaymentResponse;
@@ -26,18 +27,18 @@ public class PaymentService {
 
     @Transactional
     public PaymentResponse transferMoney(Long accountId, String toIban, String toName,
-                                         BigDecimal amount, String currency,
+                                         Money balance,
                                          String addressType, String addressValue){
 
-        BankAccount updatedAccount = bankAccountService.withdraw(accountId, amount);
+        BankAccount updatedAccount = bankAccountService.withdraw(accountId, balance.getAmount());
 
         Payment payment = Payment.builder()
                 .user(updatedAccount.getUser())
                 .bankAccount(updatedAccount)
                 .toIban(toIban != null ? toIban : addressValue)
                 .toName(toName)
-                .amount(amount)
-                .currency(currency)
+                .amount(balance.getAmount())
+                .currency(balance.getCurrency())
                 .status(Payment.PaymentStatus.PENDING)
                 .build();
 
@@ -45,8 +46,8 @@ public class PaymentService {
 
         QnbMoneyTransferRequest.QnbMoneyTransferRequestBuilder requestBuilder = QnbMoneyTransferRequest.builder()
                 .accountNumber(Long.parseLong(updatedAccount.getBankAccountNumber()))
-                .currency(currency)
-                .amount(amount.toString())
+                .currency(balance.getCurrency())
+                .amount(balance.getAmount().toString())
                 .receiverName(toName)
                 .rentType("03")
                 .versionNumber("1")
