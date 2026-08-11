@@ -1,5 +1,6 @@
 package com.mehmetkatr.financehub.service;
 
+import com.mehmetkatr.financehub.domain.Money;
 import com.mehmetkatr.financehub.dto.response.TransactionResponse;
 import com.mehmetkatr.financehub.entity.BankAccount;
 import com.mehmetkatr.financehub.entity.Category;
@@ -38,13 +39,9 @@ public class TransactionService {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
-        Transaction newTransaction = Transaction.builder()
-                .bankAccount(bankAccount)
-                .category(category)
-                .amount(amount)
-                .currency(currency)
-                .transactionType(transactionTypes)
-                .description(description).build();
+        Money money = new Money(amount, currency);
+
+        Transaction newTransaction = bankAccount.addTransaction(money, category, transactionTypes, description);
 
         transactionRepository.save(newTransaction);
 
@@ -54,7 +51,7 @@ public class TransactionService {
                     categoryId,
                     LocalDate.now().getYear(),
                     LocalDate.now().getMonthValue(),
-                    amount
+                    money.getAmount()
             );
 
         return toResponse(newTransaction);

@@ -77,6 +77,16 @@ public class BankAccount extends BaseEntity {
         this.balance = this.balance.subtract(amount);
     }
 
+    public  Transaction addTransaction(Money amount, Category category, Transaction.TransactionTypes type, String description){
+        return Transaction.builder()
+                .bankAccount(this)
+                .category(category)
+                .amount(amount.getAmount())
+                .currency(amount.getCurrency())
+                .transactionType(type)
+                .description(description).build();
+    }
+
     public enum AccountType {
         CHECKING,
         SAVINGS,
