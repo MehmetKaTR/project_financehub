@@ -1,5 +1,6 @@
 package com.mehmetkatr.financehub.entity;
 
+import com.mehmetkatr.financehub.domain.Money;
 import com.mehmetkatr.financehub.entity.base.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
@@ -52,13 +53,28 @@ public class Budget extends BaseEntity {
     @Column(name = "year", nullable = false)
     private Integer year;
 
-    @NotNull
-    @Column(name = "limit_amount", precision = 19, scale = 4, nullable = false)
-    private BigDecimal limitAmount;
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "amount", column = @Column(name = "limit_amount")),
+            @AttributeOverride(name = "currency", column = @Column(name = "limit_currency"))
+    })
+    private Money limitAmount;
 
-    @NotNull
-    @Column(name = "spend_amount",  precision = 19, scale = 4, nullable = false)
-    private BigDecimal spendAmount;
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "amount", column = @Column(name = "spend_amount")),
+            @AttributeOverride(name = "currency", column = @Column(name = "spend_currency"))
+    })
+    private Money spendAmount;
+
+    public void addSpending(Money amount)
+    {
+        this.spendAmount = this.getSpendAmount().add(amount);
+    }
+
+    private boolean isOverLimit(){
+        return this.spendAmount.isGreaterThan(this.limitAmount);
+    }
 
     public enum PeriodType {
         YEARLY,

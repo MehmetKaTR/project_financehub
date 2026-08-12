@@ -11,7 +11,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     List<Payment> findByBankAccountId(Long accountId);
 
-    List<Payment> findByCurrency(String currency);
+    List<Payment> findByAmountCurrency(String currency);
 
     List<Payment> findByStatus(Payment.PaymentStatus status);
 

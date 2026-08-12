@@ -1,5 +1,6 @@
 package com.mehmetkatr.financehub.controller;
 
+import com.mehmetkatr.financehub.domain.Money;
 import com.mehmetkatr.financehub.dto.request.TransactionRequest;
 import com.mehmetkatr.financehub.dto.response.TransactionResponse;
 import com.mehmetkatr.financehub.service.TransactionService;
@@ -22,8 +23,7 @@ public class TransactionController {
         TransactionResponse newTransaction = transactionService.createTransaction(
                 request.getBankAccountId(),
                 request.getCategoryId(),
-                request.getAmount(),
-                request.getCurrency(),
+                new Money(request.getAmount(), request.getCurrency()),
                 request.getTransactionTypes(),
                 request.getDescription()
         );

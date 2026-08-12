@@ -1,5 +1,6 @@
 package com.mehmetkatr.financehub.service;
 
+import com.mehmetkatr.financehub.domain.Money;
 import com.mehmetkatr.financehub.entity.BankAccount;
 import com.mehmetkatr.financehub.entity.Category;
 import com.mehmetkatr.financehub.entity.Transaction;
@@ -47,7 +48,7 @@ class TransactionServiceTest {
         when(bankAccountRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> transactionService.createTransaction(
-                1L, 2L, new BigDecimal("100"), "TRY", Transaction.TransactionTypes.EXPENSE, "market"))
+                1L, 2L, new Money(new BigDecimal("100"), "TRY"), Transaction.TransactionTypes.EXPENSE, "market"))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Bank Account not found");
     }
@@ -58,7 +59,7 @@ class TransactionServiceTest {
         when(categoryRepository.findById(2L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> transactionService.createTransaction(
-                1L, 2L, new BigDecimal("100"), "TRY", Transaction.TransactionTypes.EXPENSE, "market"))
+                1L, 2L, new Money(new BigDecimal("100"), "TRY"), Transaction.TransactionTypes.EXPENSE, "market"))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Category not found");
     }
@@ -73,10 +74,10 @@ class TransactionServiceTest {
         when(categoryRepository.findById(2L)).thenReturn(Optional.of(category));
 
         transactionService.createTransaction(
-                1L, 2L, new BigDecimal("100"), "TRY", Transaction.TransactionTypes.EXPENSE, "market");
+                1L, 2L, new Money(new BigDecimal("100"), "TRY"), Transaction.TransactionTypes.EXPENSE, "market");
 
         // EXPENSE oldugu icin budgetService.addSpending cagrilmali
-        verify(budgetService).addSpending(eq(5L), eq(2L), any(), any(), eq(new BigDecimal("100")));
+        verify(budgetService).addSpending(eq(5L), eq(2L), any(), any(), eq(new Money(new BigDecimal("100"), "TRY")));
     }
 
     @Test
@@ -88,7 +89,7 @@ class TransactionServiceTest {
         when(categoryRepository.findById(2L)).thenReturn(Optional.of(category));
 
         transactionService.createTransaction(
-                1L, 2L, new BigDecimal("100"), "TRY", Transaction.TransactionTypes.INCOME, "maas");
+                1L, 2L, new Money(new BigDecimal("100"), "TRY"), Transaction.TransactionTypes.INCOME, "maas");
 
         // INCOME oldugu icin addSpending ASLA cagrilmamali
         verify(budgetService, never()).addSpending(any(), any(), any(), any(), any());

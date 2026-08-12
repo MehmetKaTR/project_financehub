@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -31,7 +30,7 @@ public class TransactionService {
     }
 
     @Transactional
-    public TransactionResponse createTransaction(Long bankAccountId, Long categoryId, BigDecimal amount, String currency, Transaction.TransactionTypes transactionTypes, String description){
+    public TransactionResponse createTransaction(Long bankAccountId, Long categoryId, Money balance, Transaction.TransactionTypes transactionTypes, String description){
 
         BankAccount bankAccount = bankAccountRepository.findById(bankAccountId)
                 .orElseThrow(() -> new ResourceNotFoundException("Bank Account not found"));
@@ -39,9 +38,7 @@ public class TransactionService {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
-        Money money = new Money(amount, currency);
-
-        Transaction newTransaction = bankAccount.addTransaction(money, category, transactionTypes, description);
+        Transaction newTransaction = bankAccount.addTransaction(balance, category, transactionTypes, description);
 
         transactionRepository.save(newTransaction);
 
@@ -51,7 +48,7 @@ public class TransactionService {
                     categoryId,
                     LocalDate.now().getYear(),
                     LocalDate.now().getMonthValue(),
-                    money.getAmount()
+                    balance
             );
 
         return toResponse(newTransaction);
@@ -65,8 +62,8 @@ public class TransactionService {
         if (transaction.getCategory() != null) {
             response.setCategoryId(transaction.getCategory().getId());
         }
-        response.setAmount(transaction.getAmount());
-        response.setCurrency(transaction.getCurrency());
+        response.setAmount(transaction.getBalance().getAmount());
+        response.setCurrency(transaction.getBalance().getCurrency());
         response.setType(transaction.getTransactionType());
         response.setDescription(transaction.getDescription());
         response.setReferenceNumber(transaction.getReferenceNumber());

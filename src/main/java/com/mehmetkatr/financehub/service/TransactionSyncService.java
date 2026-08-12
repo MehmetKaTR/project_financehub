@@ -43,8 +43,7 @@ public class TransactionSyncService {
             }
             Transaction trx = Transaction.builder()
                     .bankAccount(account)
-                    .amount(new BigDecimal(dto.getTransactionAmount()))
-                    .currency(dto.getCurrencyCode())
+                    .balance(new Money(new BigDecimal(dto.getTransactionAmount()), dto.getCurrencyCode()))
                     .transactionType("A".equals(dto.getDebitOrCreditCode())
                             ? Transaction.TransactionTypes.INCOME
                             : Transaction.TransactionTypes.EXPENSE)

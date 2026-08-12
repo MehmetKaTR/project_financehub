@@ -27,18 +27,17 @@ public class PaymentService {
 
     @Transactional
     public PaymentResponse transferMoney(Long accountId, String toIban, String toName,
-                                         Money balance,
+                                         Money amount,
                                          String addressType, String addressValue){
 
-        BankAccount updatedAccount = bankAccountService.withdraw(accountId, balance.getAmount());
+        BankAccount updatedAccount = bankAccountService.withdraw(accountId, amount.getAmount());
 
         Payment payment = Payment.builder()
                 .user(updatedAccount.getUser())
                 .bankAccount(updatedAccount)
                 .toIban(toIban != null ? toIban : addressValue)
                 .toName(toName)
-                .amount(balance.getAmount())
-                .currency(balance.getCurrency())
+                .amount(amount)
                 .status(Payment.PaymentStatus.PENDING)
                 .build();
 
@@ -46,8 +45,8 @@ public class PaymentService {
 
         QnbMoneyTransferRequest.QnbMoneyTransferRequestBuilder requestBuilder = QnbMoneyTransferRequest.builder()
                 .accountNumber(Long.parseLong(updatedAccount.getBankAccountNumber()))
-                .currency(balance.getCurrency())
-                .amount(balance.getAmount().toString())
+                .currency(amount.getCurrency())
+                .amount(amount.getAmount().toString())
                 .receiverName(toName)
                 .rentType("03")
                 .versionNumber("1")
@@ -65,9 +64,9 @@ public class PaymentService {
         QnbMoneyTransferResponse response = qnbApiService.transferMoney(request);
 
         if ("000".equals(response.getResultCode()) || "998".equals(response.getResultCode())) {
-            payment.setStatus(Payment.PaymentStatus.COMPLETED);
+            payment.markAsCompleted();
         } else {
-            payment.setStatus(Payment.PaymentStatus.FAILED);
+            payment.markAsFailed();
         }
         paymentRepository.save(payment);
 
@@ -82,8 +81,8 @@ public class PaymentService {
         response.setBankAccountId(payment.getBankAccount().getId());
         response.setToIban(payment.getToIban());
         response.setToName(payment.getToName());
-        response.setAmount(payment.getAmount());
-        response.setCurrency(payment.getCurrency());
+        response.setAmount(payment.getAmount().getAmount());
+        response.setCurrency(payment.getAmount().getCurrency());
         response.setStatus(payment.getStatus());
         response.setDescription(payment.getDescription());
         response.setScheduledDate(payment.getScheduledDate());

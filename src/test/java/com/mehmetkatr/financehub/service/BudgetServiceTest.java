@@ -1,5 +1,6 @@
 package com.mehmetkatr.financehub.service;
 
+import com.mehmetkatr.financehub.domain.Money;
 import com.mehmetkatr.financehub.dto.response.BudgetResponse;
 import com.mehmetkatr.financehub.entity.Budget;
 import com.mehmetkatr.financehub.entity.Category;
@@ -44,7 +45,7 @@ class BudgetServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> budgetService.createBudget(
-                1L, 2L, Budget.PeriodType.MONTHLY, 7, 2026, new BigDecimal("1000")))
+                1L, 2L, Budget.PeriodType.MONTHLY, 7, 2026, new Money(new BigDecimal("1000"), "TRY")))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("User not found");
     }
@@ -55,7 +56,7 @@ class BudgetServiceTest {
         when(categoryRepository.findById(2L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> budgetService.createBudget(
-                1L, 2L, Budget.PeriodType.MONTHLY, 7, 2026, new BigDecimal("1000")))
+                1L, 2L, Budget.PeriodType.MONTHLY, 7, 2026, new Money(new BigDecimal("1000"), "TRY")))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Category not found");
     }
@@ -66,7 +67,7 @@ class BudgetServiceTest {
         when(categoryRepository.findById(2L)).thenReturn(Optional.of(Category.builder().id(2L).build()));
 
         BudgetResponse sonuc = budgetService.createBudget(
-                1L, 2L, Budget.PeriodType.MONTHLY, 7, 2026, new BigDecimal("1000"));
+                1L, 2L, Budget.PeriodType.MONTHLY, 7, 2026, new Money(new BigDecimal("1000"), "TRY"));
 
         assertThat(sonuc.getSpendAmount()).isEqualByComparingTo(BigDecimal.ZERO);
         assertThat(sonuc.getLimitAmount()).isEqualByComparingTo(new BigDecimal("1000"));
@@ -78,7 +79,7 @@ class BudgetServiceTest {
         when(budgetRepository.findByUserIdAndCategoryIdAndYearAndMonth(1L, 2L, 2026, 7))
                 .thenReturn(Optional.empty());
 
-        budgetService.addSpending(1L, 2L, 2026, 7, new BigDecimal("500"));
+        budgetService.addSpending(1L, 2L, 2026, 7, new Money(new BigDecimal("500"), "TRY"));
 
         verify(budgetRepository, never()).save(any());
     }
@@ -87,14 +88,14 @@ class BudgetServiceTest {
     @Test
     void addSpending_butceVarsa_spendAmountArtar() {
         Budget budget = Budget.builder()
-                .spendAmount(new BigDecimal("100"))
+                .spendAmount(new Money(new BigDecimal("100"), "TRY"))
                 .build();
         when(budgetRepository.findByUserIdAndCategoryIdAndYearAndMonth(1L, 2L, 2026, 7))
                 .thenReturn(Optional.of(budget));
 
-        budgetService.addSpending(1L, 2L, 2026, 7, new BigDecimal("500"));
+        budgetService.addSpending(1L, 2L, 2026, 7, new Money(new BigDecimal("500"), "TRY"));
 
         verify(budgetRepository).save(budget);
-        assertThat(budget.getSpendAmount()).isEqualByComparingTo(new BigDecimal("600"));
+        assertThat(budget.getSpendAmount().getAmount()).isEqualByComparingTo(new BigDecimal("600"));
     }
 }

@@ -5,7 +5,7 @@ import lombok.Getter;
 
 import java.math.BigDecimal;
 
-@Embeddable
+@Embeddable //Veritabanında money diye ayrı tablo olmaz. Bunun yerine bank_accounts tablosuna iki kolon eklenir: balance_amount | balance_currency
 @Getter
 public class Money {
 
@@ -41,4 +41,27 @@ public class Money {
         }
         return new Money(this.amount.subtract(other.amount), this.currency);
     }
+
+    public boolean isGreaterThan(Money other)
+    {
+        if(!this.currency.equals(other.currency))
+        {
+            throw new IllegalArgumentException("Farkli para birimleri karsilastirilamaz");
+        }
+        return this.amount.compareTo(other.amount) > 0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Money money = (Money) o;
+        return amount.compareTo(money.amount) == 0 && currency.equals(money.currency);
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(amount, currency);
+    }
+
 }

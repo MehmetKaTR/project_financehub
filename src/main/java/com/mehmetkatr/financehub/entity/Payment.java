@@ -1,5 +1,6 @@
 package com.mehmetkatr.financehub.entity;
 
+import com.mehmetkatr.financehub.domain.Money;
 import com.mehmetkatr.financehub.entity.base.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -46,12 +47,8 @@ public class Payment extends BaseEntity {
     private String toName;
 
     @NotNull
-    @Column(precision=19, scale=4, nullable=false)
-    private BigDecimal amount;
-
-    @NotBlank
-    @Column(length=3, nullable=false)
-    private String currency;
+    @Embedded
+    private Money amount;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -66,6 +63,14 @@ public class Payment extends BaseEntity {
 
     @Column(name="executed_at",nullable=true)
     private LocalDateTime executedAt;
+
+    public void markAsCompleted(){
+        this.status = PaymentStatus.COMPLETED;
+    }
+
+    public void markAsFailed(){
+        this.status = PaymentStatus.FAILED;
+    }
 
     public enum PaymentStatus {
         PENDING,

@@ -42,7 +42,7 @@ public class BankAccount extends BaseEntity {
     private String iban;
 
     @NotNull
-    @Embedded
+    @Embedded //Veritabanında money diye ayrı tablo olmaz. Bunun yerine bank_accounts tablosuna iki kolon eklenir: balance_amount | balance_currency
     private Money balance;
 
     @NotNull
@@ -81,8 +81,7 @@ public class BankAccount extends BaseEntity {
         return Transaction.builder()
                 .bankAccount(this)
                 .category(category)
-                .amount(amount.getAmount())
-                .currency(amount.getCurrency())
+                .balance(amount)
                 .transactionType(type)
                 .description(description).build();
     }

@@ -1,5 +1,6 @@
 package com.mehmetkatr.financehub.controller;
 
+import com.mehmetkatr.financehub.domain.Money;
 import com.mehmetkatr.financehub.dto.request.BudgetRequest;
 import com.mehmetkatr.financehub.dto.response.BudgetResponse;
 import com.mehmetkatr.financehub.entity.Budget;
@@ -26,7 +27,7 @@ public class BudgetController {
                 request.getPeriodType(),
                 request.getMonth(),
                 request.getYear(),
-                request.getLimitAmount()
+                new Money(request.getLimitAmount(), request.getCurrency())
         );
 
         return ResponseEntity.ok(newBudget);

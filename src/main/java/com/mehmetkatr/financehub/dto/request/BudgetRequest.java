@@ -14,4 +14,5 @@ public class BudgetRequest {
     private Integer month;
     private Integer year;
     private BigDecimal limitAmount;
+    private String currency;
 }

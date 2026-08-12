@@ -1,5 +1,6 @@
 package com.mehmetkatr.financehub.entity;
 
+import com.mehmetkatr.financehub.domain.Money;
 import com.mehmetkatr.financehub.entity.base.BaseEntity;
 import com.mehmetkatr.financehub.entity.base.JCreatedEntity;
 import jakarta.persistence.*;
@@ -37,12 +38,8 @@ public class Transaction extends JCreatedEntity {
     private Category category;
 
     @NotNull
-    @Column(precision = 19, scale = 4, nullable = false)
-    private BigDecimal amount = BigDecimal.ZERO;
-
-    @NotBlank
-    @Column(length = 3)
-    private String currency;
+    @Embedded //Veritabanında money diye ayrı tablo olmaz. Bunun yerine bank_accounts tablosuna iki kolon eklenir: balance_amount | balance_currency
+    private Money balance;
 
     @NotNull
     @Enumerated(EnumType.STRING)
