@@ -1,18 +1,18 @@
 package com.mehmetkatr.financehub.service;
 
 import com.mehmetkatr.financehub.domain.Money;
-import com.mehmetkatr.financehub.dto.qnb.QnbMoneyTransferRequest;
-import com.mehmetkatr.financehub.dto.qnb.QnbMoneyTransferResponse;
 import com.mehmetkatr.financehub.dto.response.PaymentResponse;
 import com.mehmetkatr.financehub.entity.BankAccount;
 import com.mehmetkatr.financehub.entity.Payment;
+import com.mehmetkatr.financehub.port.BankTransferPort;
+import com.mehmetkatr.financehub.port.TransferCommand;
+import com.mehmetkatr.financehub.port.TransferResult;
 import com.mehmetkatr.financehub.repository.BankAccountRepository;
 import com.mehmetkatr.financehub.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +21,7 @@ public class PaymentService {
     private final BankAccountRepository bankAccountRepository;
     private final BankAccountService bankAccountService;
 
-    private final QnbApiService qnbApiService;
+    private final BankTransferPort bankTransferPort;
 
     private final PaymentRepository paymentRepository;
 
@@ -43,31 +43,22 @@ public class PaymentService {
 
         paymentRepository.save(payment);
 
-        QnbMoneyTransferRequest.QnbMoneyTransferRequestBuilder requestBuilder = QnbMoneyTransferRequest.builder()
-                .accountNumber(Long.parseLong(updatedAccount.getBankAccountNumber()))
-                .currency(amount.getCurrency())
-                .amount(amount.getAmount().toString())
-                .receiverName(toName)
-                .rentType("03")
-                .versionNumber("1")
-                .firmReferansNumber(payment.getId());
+        TransferCommand command = new TransferCommand(
+                updatedAccount.getBankAccountNumber(),
+                toIban != null ? toIban : addressValue,
+                amount,
+                toName,
+                addressType,
+                addressValue,
+                Long.toString(payment.getId())
+                );
 
-        if (toIban != null) {
-            requestBuilder.targetAccount(toIban);
-        } else {
-            requestBuilder.addressType(addressType);
-            requestBuilder.addressValue(addressValue);
-        }
-
-        QnbMoneyTransferRequest request = requestBuilder.build();
-
-        QnbMoneyTransferResponse response = qnbApiService.transferMoney(request);
-
-        if ("000".equals(response.getResultCode()) || "998".equals(response.getResultCode())) {
+        TransferResult resp = bankTransferPort.transfer(command);
+        if(resp.success())
             payment.markAsCompleted();
-        } else {
+        else
             payment.markAsFailed();
-        }
+
         paymentRepository.save(payment);
 
         return toResponse(payment);
