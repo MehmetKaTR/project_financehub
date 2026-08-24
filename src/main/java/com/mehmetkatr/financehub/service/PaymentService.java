@@ -7,8 +7,8 @@ import com.mehmetkatr.financehub.entity.Payment;
 import com.mehmetkatr.financehub.port.BankTransferPort;
 import com.mehmetkatr.financehub.port.TransferCommand;
 import com.mehmetkatr.financehub.port.TransferResult;
-import com.mehmetkatr.financehub.repository.BankAccountRepository;
 import com.mehmetkatr.financehub.repository.PaymentRepository;
+import com.mehmetkatr.financehub.service.command.BankAccountCommandService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,8 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PaymentService {
 
-    private final BankAccountRepository bankAccountRepository;
-    private final BankAccountService bankAccountService;
+    // private final BankAccountService bankAccountService;
+    private final BankAccountCommandService bankAccountCommandService;
 
     private final BankTransferPort bankTransferPort;
 
@@ -30,7 +30,7 @@ public class PaymentService {
                                          Money amount,
                                          String addressType, String addressValue){
 
-        BankAccount updatedAccount = bankAccountService.withdraw(accountId, amount.getAmount());
+        BankAccount updatedAccount = bankAccountCommandService.withdraw(accountId, amount.getAmount());
 
         Payment payment = Payment.builder()
                 .user(updatedAccount.getUser())

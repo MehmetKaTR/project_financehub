@@ -10,6 +10,7 @@ import com.mehmetkatr.financehub.port.TransferCommand;
 import com.mehmetkatr.financehub.port.TransferResult;
 import com.mehmetkatr.financehub.repository.BankAccountRepository;
 import com.mehmetkatr.financehub.repository.PaymentRepository;
+import com.mehmetkatr.financehub.service.command.BankAccountCommandService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,7 +31,7 @@ class PaymentServiceTest {
     private BankAccountRepository bankAccountRepository;
 
     @Mock
-    private BankAccountService bankAccountService;
+    private BankAccountCommandService bankAccountCommandService;
 
     @Mock
     private BankTransferPort bankTransferPort;
@@ -67,7 +68,7 @@ class PaymentServiceTest {
     @Test
     void transferMoney_transferBasarili_statusCompleted() {
         saveIdAtar();
-        when(bankAccountService.withdraw(1L, new BigDecimal("100"))).thenReturn(sahteHesap());
+        when(bankAccountCommandService.withdraw(1L, new BigDecimal("100"))).thenReturn(sahteHesap());
         when(bankTransferPort.transfer(any(TransferCommand.class))).thenReturn(transferSonucu(true));
 
         PaymentResponse sonuc = paymentService.transferMoney(
@@ -79,7 +80,7 @@ class PaymentServiceTest {
     @Test
     void transferMoney_transferBasarisiz_statusFailed() {
         saveIdAtar();
-        when(bankAccountService.withdraw(1L, new BigDecimal("100"))).thenReturn(sahteHesap());
+        when(bankAccountCommandService.withdraw(1L, new BigDecimal("100"))).thenReturn(sahteHesap());
         when(bankTransferPort.transfer(any(TransferCommand.class))).thenReturn(transferSonucu(false));
 
         PaymentResponse sonuc = paymentService.transferMoney(
@@ -91,20 +92,20 @@ class PaymentServiceTest {
     @Test
     void transferMoney_onceWithdrawCagrilir() {
         saveIdAtar();
-        when(bankAccountService.withdraw(1L, new BigDecimal("100"))).thenReturn(sahteHesap());
+        when(bankAccountCommandService.withdraw(1L, new BigDecimal("100"))).thenReturn(sahteHesap());
         when(bankTransferPort.transfer(any(TransferCommand.class))).thenReturn(transferSonucu(true));
 
         paymentService.transferMoney(
                 1L, "TR123", "Alici", new Money(new BigDecimal("100"), "TRY"), null, null);
 
         // bakiye dusme adimi (withdraw) gercekten cagrildi mi?
-        verify(bankAccountService).withdraw(1L, new BigDecimal("100"));
+        verify(bankAccountCommandService).withdraw(1L, new BigDecimal("100"));
     }
 
     @Test
     void transferMoney_portCagrilir() {
         saveIdAtar();
-        when(bankAccountService.withdraw(1L, new BigDecimal("100"))).thenReturn(sahteHesap());
+        when(bankAccountCommandService.withdraw(1L, new BigDecimal("100"))).thenReturn(sahteHesap());
         when(bankTransferPort.transfer(any(TransferCommand.class))).thenReturn(transferSonucu(true));
 
         paymentService.transferMoney(

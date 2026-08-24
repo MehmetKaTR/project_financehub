@@ -3,7 +3,8 @@ package com.mehmetkatr.financehub.controller;
 import com.mehmetkatr.financehub.domain.Money;
 import com.mehmetkatr.financehub.dto.request.CreateBankAccountRequest;
 import com.mehmetkatr.financehub.dto.response.BankAccountResponse;
-import com.mehmetkatr.financehub.service.BankAccountService;
+import com.mehmetkatr.financehub.service.command.BankAccountCommandService;
+import com.mehmetkatr.financehub.service.query.BankAccountQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,14 +18,16 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class BankAccountController {
 
-    private final BankAccountService bankAccountService;
+    // private final BankAccountService bankAccountService;
+    private final BankAccountQueryService bankAccountQueryService;
+    private final BankAccountCommandService bankAccountCommandService;
 
     @PostMapping
     public ResponseEntity<BankAccountResponse> createBankAccount(@RequestBody CreateBankAccountRequest request){
 
         Money balance = new Money(request.getBalance(), request.getCurrency());
 
-        BankAccountResponse newBankAccount = bankAccountService.createBankAccount(
+        BankAccountResponse newBankAccount = bankAccountCommandService.createBankAccount(
                 request.getUserId(),
                 request.getBankName(),
                 request.getBankAccountNumber(),
@@ -38,7 +41,7 @@ public class BankAccountController {
 
     @GetMapping("/{id}")
     public ResponseEntity<BankAccountResponse> getAccountInfoById(@PathVariable Long id) {
-        Optional<BankAccountResponse> bankAccount = bankAccountService.findById(id);
+        Optional<BankAccountResponse> bankAccount = bankAccountQueryService.findById(id);
 
         return bankAccount.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -46,7 +49,7 @@ public class BankAccountController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<BankAccountResponse>> getAccountInfoByUserId(@PathVariable Long userId){
 
-        List<BankAccountResponse> bankAccounts = bankAccountService.findByUserId(userId);
+        List<BankAccountResponse> bankAccounts = bankAccountQueryService.findByUserId(userId);
 
         return ResponseEntity.ok(bankAccounts);
     }
@@ -54,7 +57,7 @@ public class BankAccountController {
     @PostMapping("/{id}/deposit")
     public ResponseEntity<BankAccountResponse> processDeposit(@PathVariable Long id, @RequestParam BigDecimal amount){
 
-        BankAccountResponse bankAccount = bankAccountService.deposit(id, amount);
+        BankAccountResponse bankAccount = bankAccountCommandService.deposit(id, amount);
 
         return ResponseEntity.ok(bankAccount);
     }
@@ -62,7 +65,7 @@ public class BankAccountController {
     @PostMapping("/{id}/withdraw")
     public ResponseEntity<BankAccountResponse> processWithdraw(@PathVariable Long id, @RequestParam BigDecimal amount){
 
-        BankAccountResponse bankAccount = bankAccountService.withdrawForApi(id, amount);
+        BankAccountResponse bankAccount = bankAccountCommandService.withdrawForApi(id, amount);
 
         return ResponseEntity.ok(bankAccount);
     }
@@ -70,7 +73,7 @@ public class BankAccountController {
     @PostMapping("/{id}/activate")
     public ResponseEntity<BankAccountResponse> activateBankAccount(@PathVariable Long id){
 
-        BankAccountResponse bankAccount = bankAccountService.activateAccount(id);
+        BankAccountResponse bankAccount = bankAccountCommandService.activateAccount(id);
 
         return ResponseEntity.ok(bankAccount);
     }
@@ -78,7 +81,7 @@ public class BankAccountController {
     @PostMapping("/{id}/deactivate")
     public ResponseEntity<BankAccountResponse> deactivateBankAccount(@PathVariable Long id){
 
-        BankAccountResponse bankAccount = bankAccountService.deactivateAccount(id);
+        BankAccountResponse bankAccount = bankAccountCommandService.deactivateAccount(id);
 
         return ResponseEntity.ok(bankAccount);
     }
