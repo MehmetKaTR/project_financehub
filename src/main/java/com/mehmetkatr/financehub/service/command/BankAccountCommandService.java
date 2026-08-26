@@ -3,11 +3,13 @@ package com.mehmetkatr.financehub.service.command;
 import com.mehmetkatr.financehub.domain.Money;
 import com.mehmetkatr.financehub.dto.response.BankAccountResponse;
 import com.mehmetkatr.financehub.entity.BankAccount;
+import com.mehmetkatr.financehub.entity.OutboxEvent;
 import com.mehmetkatr.financehub.entity.User;
 import com.mehmetkatr.financehub.event.BankAccountChangedEvent;
 import com.mehmetkatr.financehub.exception.ResourceNotFoundException;
 import com.mehmetkatr.financehub.mapper.BankAccountMapper;
 import com.mehmetkatr.financehub.repository.BankAccountRepository;
+import com.mehmetkatr.financehub.repository.OutboxRepository;
 import com.mehmetkatr.financehub.repository.UserRepository;
 //import com.mehmetkatr.financehub.repository.redis.BankAccountReadRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +28,8 @@ public class BankAccountCommandService {
     //private final BankAccountReadRepository readRepository;
     private final UserRepository userRepository;
     private final BankAccountMapper bankAccountMapper;
-    private final ApplicationEventPublisher eventPublisher;
+    //private final ApplicationEventPublisher eventPublisher;
+    private final OutboxRepository outboxRepository;
 
     @Transactional
     public BankAccountResponse createBankAccount(Long userId, String bankName, String bankAccountNumber, String iban, Money balance, BankAccount.AccountType type){
@@ -45,7 +49,8 @@ public class BankAccountCommandService {
 
         bankAccountRepository.save(newBankAccount);
         //readRepository.save(bankAccountMapper.toReadModel(newBankAccount));
-        eventPublisher.publishEvent(new BankAccountChangedEvent(newBankAccount.getId()));
+        //eventPublisher.publishEvent(new BankAccountChangedEvent(newBankAccount.getId()));
+        writeToOutbox(newBankAccount.getId());
 
         return bankAccountMapper.toResponse(newBankAccount);
     }
@@ -59,7 +64,8 @@ public class BankAccountCommandService {
 
         bankAccountRepository.save(currentBankAccount);
         //readRepository.save(bankAccountMapper.toReadModel(currentBankAccount));
-        eventPublisher.publishEvent(new BankAccountChangedEvent(currentBankAccount.getId()));
+        //eventPublisher.publishEvent(new BankAccountChangedEvent(currentBankAccount.getId()));
+        writeToOutbox(currentBankAccount.getId());
 
         return bankAccountMapper.toResponse(currentBankAccount);
     }
@@ -73,7 +79,8 @@ public class BankAccountCommandService {
 
         bankAccountRepository.save(currentBankAccount);
         //readRepository.save(bankAccountMapper.toReadModel(currentBankAccount));
-        eventPublisher.publishEvent(new BankAccountChangedEvent(currentBankAccount.getId()));
+        //eventPublisher.publishEvent(new BankAccountChangedEvent(currentBankAccount.getId()));
+        writeToOutbox(currentBankAccount.getId());
 
         return bankAccountMapper.toResponse(currentBankAccount);
     }
@@ -87,7 +94,8 @@ public class BankAccountCommandService {
 
         bankAccountRepository.save(account);
         //readRepository.save(bankAccountMapper.toReadModel(account));
-        eventPublisher.publishEvent(new BankAccountChangedEvent(account.getId()));
+        //eventPublisher.publishEvent(new BankAccountChangedEvent(account.getId()));
+        writeToOutbox(account.getId());
 
         return bankAccountMapper.toResponse(account);
     }
@@ -101,7 +109,8 @@ public class BankAccountCommandService {
 
         bankAccountRepository.save(account);
         //readRepository.save(bankAccountMapper.toReadModel(account));
-        eventPublisher.publishEvent(new BankAccountChangedEvent(account.getId()));
+        //eventPublisher.publishEvent(new BankAccountChangedEvent(account.getId()));
+        writeToOutbox(account.getId());
 
         return account;
     }
@@ -109,5 +118,15 @@ public class BankAccountCommandService {
     @Transactional
     public BankAccountResponse withdrawForApi(Long accountId, BigDecimal amount) {
         return bankAccountMapper.toResponse(withdraw(accountId, amount));
+    }
+
+    private void writeToOutbox(Long accountId) {
+        outboxRepository.save(OutboxEvent.builder()
+                .aggregateType("BankAccount")
+                .aggregateId(accountId)
+                .eventType("CHANGED")
+                .processed(false)
+                .createdAt(LocalDateTime.now())
+                .build());
     }
 }
