@@ -1,0 +1,30 @@
+server:
+  port: 8080                      # Gateway tek kapı — 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: user-service                       # route'un adı (serbest)
+              uri: lb://USER-SERVICE                  # Eureka'dan İSİMLE bul (lb = load balanced)
+              predicates:
+                - Path=/api/auth/**,/api/users/**     # bu yollar user-service'e gitsin
+
+            - id: account-service
+              uri: lb://ACCOUNT-SERVICE
+              predicates:
+                - Path=/api/bank-accounts/**
+
+            - id: payment-service
+              uri: lb://PAYMENT-SERVICE
+              predicates:
+                - Path=/api/payments/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
