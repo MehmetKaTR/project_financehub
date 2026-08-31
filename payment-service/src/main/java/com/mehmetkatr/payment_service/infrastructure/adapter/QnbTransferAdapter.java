@@ -17,27 +17,33 @@ public class QnbTransferAdapter implements BankTransferPort {
 
     @Override
     public TransferResult transfer(TransferCommand command) {
+        try {
+            QnbMoneyTransferRequest.QnbMoneyTransferRequestBuilder builder = QnbMoneyTransferRequest.builder()
+                    .accountNumber(Long.parseLong(command.senderAccountNumber()))
+                    .currency(command.amount().getCurrency())
+                    .amount(command.amount().getAmount().toString())
+                    .receiverName(command.receiverName())
+                    .firmReferansNumber(Long.parseLong(command.firmReference()))
+                    .rentType("03")
+                    .versionNumber("1");
 
-        QnbMoneyTransferRequest.QnbMoneyTransferRequestBuilder builder = QnbMoneyTransferRequest.builder()
-                .accountNumber(Long.parseLong(command.senderAccountNumber()))
-                .currency(command.amount().getCurrency())
-                .amount(command.amount().getAmount().toString())
-                .receiverName(command.receiverName())
-                .firmReferansNumber(Long.parseLong(command.firmReference()))
-                .rentType("03")            // ← QNB detayı, ARTIK BURADA (PaymentService'te değil)
-                .versionNumber("1");       // ← QNB detayı, burada
+            if (command.targetIban() != null) {
+                builder.targetAccount(command.targetIban());
+            } else {
+                builder.addressType(command.addressType());
+                builder.addressValue(command.addressValue());
+            }
+            QnbMoneyTransferRequest request = builder.build();
 
-        if (command.targetIban() != null) {
-            builder.targetAccount(command.targetIban());
-        } else {
-            builder.addressType(command.addressType());
-            builder.addressValue(command.addressValue());
+            QnbMoneyTransferResponse response = qnbApiService.transferMoney(request);
+            boolean success = "000".equals(response.getResultCode()) || "998".equals(response.getResultCode());
+
+            return new TransferResult(success, response.getSlipNumber());
+
+        } catch (Exception e) {
+            // QNB'ye ulaşılamadı / hata döndü → EXCEPTION FIRLATMA, başarısız olarak dön
+            System.out.println("QNB transfer hatasi: " + e.getMessage());
+            return new TransferResult(false, null);
         }
-        QnbMoneyTransferRequest request = builder.build();
-
-        QnbMoneyTransferResponse response = qnbApiService.transferMoney(request);
-        boolean success = "000".equals(response.getResultCode()) || "998".equals(response.getResultCode());
-
-        return new TransferResult(success, response.getSlipNumber());
     }
 }

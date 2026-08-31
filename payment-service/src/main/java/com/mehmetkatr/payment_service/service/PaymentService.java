@@ -5,6 +5,8 @@ import com.mehmetkatr.payment_service.domain.Money;
 import com.mehmetkatr.payment_service.dto.response.BankAccountResponse;
 import com.mehmetkatr.payment_service.dto.response.PaymentResponse;
 import com.mehmetkatr.payment_service.entity.Payment;
+import com.mehmetkatr.payment_service.event.PaymentCompletedEvent;
+import com.mehmetkatr.payment_service.event.PaymentEventPublisher;
 import com.mehmetkatr.payment_service.port.BankTransferPort;
 import com.mehmetkatr.payment_service.port.TransferCommand;
 import com.mehmetkatr.payment_service.port.TransferResult;
@@ -20,6 +22,7 @@ public class PaymentService {
     private final AccountClient accountClient;          // Feign (CommandService yerine)
     private final BankTransferPort bankTransferPort;    // QNB portu (aynı)
     private final PaymentRepository paymentRepository;
+    private final PaymentEventPublisher eventPublisher;   // yeni
 
     @Transactional
     public PaymentResponse transferMoney(Long accountId, String toIban, String toName,
@@ -51,12 +54,25 @@ public class PaymentService {
         );
 
         TransferResult resp = bankTransferPort.transfer(command);
-        if(resp.success())
+        if(resp.success()) {
             payment.markAsCompleted();
-        else
-            payment.markAsFailed();
+            paymentRepository.save(payment);
 
-        paymentRepository.save(payment);
+            // Kafka'ya yayınla
+            eventPublisher.publishPaymentCompleted(new PaymentCompletedEvent(
+                    payment.getId(),
+                    payment.getBankAccountId(),
+                    payment.getAmount().getAmount(),
+                    payment.getAmount().getCurrency(),
+                    payment.getToName()
+            ));
+        } else {
+            // 🔄 SAGA COMPENSATION: transfer patladı → çekilen parayı GERİ YÜKLE
+            accountClient.deposit(accountId, amount.getAmount());
+
+            payment.markAsFailed();
+            paymentRepository.save(payment);
+        }
 
         return toResponse(payment);
     }

@@ -13,4 +13,7 @@ public interface AccountClient {
 
     @PostMapping("/api/bank-accounts/{id}/withdraw")
     BankAccountResponse withdraw(@PathVariable Long id, @RequestParam BigDecimal amount);
+
+    @PostMapping("/api/bank-accounts/{id}/deposit")           // ← YENİ (telafi)
+    BankAccountResponse deposit(@PathVariable Long id, @RequestParam BigDecimal amount);
 }

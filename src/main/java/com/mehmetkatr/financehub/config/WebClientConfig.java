@@ -22,7 +22,7 @@ public class WebClientConfig {
     public WebClient qnbWebClient(){
         return WebClient.builder()
                 .baseUrl(baseUrl)
-                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer" + token)
+                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .build();
     }
 
