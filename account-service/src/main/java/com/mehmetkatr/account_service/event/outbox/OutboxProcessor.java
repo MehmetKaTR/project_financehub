@@ -1,6 +1,5 @@
-package com.mehmetkatr.account_service.event.outbox;
+package com.mehmetkatr.account_service.entity;
 
-import com.mehmetkatr.account_service.entity.OutboxEvent;
 import com.mehmetkatr.account_service.mapper.BankAccountMapper;
 import com.mehmetkatr.account_service.repository.BankAccountRepository;
 import com.mehmetkatr.account_service.repository.OutboxRepository;
