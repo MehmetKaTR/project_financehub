@@ -61,6 +61,20 @@
 			<optional>true</optional>
 		</dependency>
 
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-database-oracle</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-flyway</artifactId>
+			<version>4.1.1</version>
+		</dependency>
+
 		<!-- Validation (@NotBlank, @Positive vb.) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
