@@ -57,6 +57,22 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- Flyway — DB migration -->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
+		<!-- Oracle desteği (Flyway'in Oracle'i tanimasi icin) -->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-database-oracle</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-flyway</artifactId>
+			<version>4.1.1</version>
+		</dependency>
+
 		<!-- Guvenlik + JWT -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
