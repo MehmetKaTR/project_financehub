@@ -58,6 +58,7 @@ services:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
       SPRING_DATASOURCE_URL: jdbc:oracle:thin:@oracle:1521/FREEPDB1
       SPRING_DATA_REDIS_HOST: redis          # cache backend (localhost -> redis container)
+      MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT: http://jaeger:4318/v1/traces
     depends_on:
       eureka-server:
         condition: service_started
@@ -76,6 +77,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:oracle:thin:@oracle:1521/FREEPDB1
       SPRING_DATA_REDIS_HOST: redis
       SPRING_KAFKA_BOOTSTRAPSERVERS: kafka:9092
+      MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT: http://jaeger:4318/v1/traces
     depends_on:
       eureka-server:
         condition: service_started
@@ -95,6 +97,7 @@ services:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
       SPRING_DATASOURCE_URL: jdbc:oracle:thin:@oracle:1521/FREEPDB1
       SPRING_KAFKA_BOOTSTRAPSERVERS: kafka:9092
+      MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT: http://jaeger:4318/v1/traces
     depends_on:
       eureka-server:
         condition: service_started
@@ -112,9 +115,44 @@ services:
       - "8080:8080"
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT: http://jaeger:4318/v1/traces
     depends_on:
       eureka-server:
         condition: service_started
+    networks:
+      - financehub-net
+
+  # ---------- PROMETHEUS (metrik toplayici) ----------
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml   # scrape ayari
+    networks:
+      - financehub-net
+
+  # ---------- GRAFANA (dashboard) ----------
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"        # host 3001 -> container 3000 (3000 baskasinda dolu)
+    environment:
+      GF_SECURITY_ADMIN_USER: admin          # panel giris kullanici
+      GF_SECURITY_ADMIN_PASSWORD: admin      # panel giris sifre (dev)
+    depends_on:
+      - prometheus
+    networks:
+      - financehub-net
+
+  # ---------- JAEGER (distributed tracing) ----------
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"      # Jaeger UI (tarayıcıdan bakacağız)
+      - "4318:4318"        # OTLP HTTP (servisler span'leri buraya gönderir)
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"    # OTLP alımını aç
     networks:
       - financehub-net
 
