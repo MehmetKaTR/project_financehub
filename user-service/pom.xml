@@ -73,6 +73,17 @@
 			<version>4.1.1</version>
 		</dependency>
 
+		<!-- Cache backend olarak Redis -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+		<!-- Spring cache soyutlamasi -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-cache</artifactId>
+		</dependency>
+
 		<!-- Guvenlik + JWT -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

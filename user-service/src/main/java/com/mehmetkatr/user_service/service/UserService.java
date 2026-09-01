@@ -5,6 +5,8 @@ import com.mehmetkatr.user_service.entity.User;
 import com.mehmetkatr.user_service.exception.ResourceAlreadyExistsException;
 import com.mehmetkatr.user_service.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +29,7 @@ public class UserService {
         return userRepository.findByFullName(fullName).map(this::toResponse);
     }
 
+    @Cacheable(value = "users", key ="#id") // sonucu "users" cache'ine, anahtar = id
     public Optional<UserResponse> findById(Long id) {
         return userRepository.findById(id).map(this::toResponse);
     }
@@ -35,6 +38,7 @@ public class UserService {
         return userRepository.findByPhone(phone).map(this::toResponse);
     }
 
+    @CacheEvict(value = "users", allEntries = true) // yeni kullanıcı → users cache'ini temizle
     @Transactional
     public UserResponse registerUser(String fullName, String email, String rawPassword, String phone) {
         if (userRepository.findByEmail(email).isPresent()) {

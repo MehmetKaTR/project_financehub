@@ -57,11 +57,14 @@ services:
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
       SPRING_DATASOURCE_URL: jdbc:oracle:thin:@oracle:1521/FREEPDB1
+      SPRING_DATA_REDIS_HOST: redis          # cache backend (localhost -> redis container)
     depends_on:
       eureka-server:
         condition: service_started
       oracle:
         condition: service_healthy
+      redis:
+        condition: service_started
     networks:
       - financehub-net
 
