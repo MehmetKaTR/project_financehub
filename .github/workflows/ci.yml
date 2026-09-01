@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [ microservices, master ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [eureka-server, user-service, account-service, payment-service, api-gateway]
+    steps:
+      - name: Kodu çek
+        uses: actions/checkout@v4
+
+      - name: JDK 21 kur
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: ${{ matrix.service }} derle
+        run: mvn -B clean package -DskipTests --file ${{ matrix.service }}/pom.xml
