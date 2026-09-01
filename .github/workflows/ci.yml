@@ -22,5 +22,5 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: ${{ matrix.service }} derle
-        run: mvn -B clean package -DskipTests --file ${{ matrix.service }}/pom.xml
+      - name: ${{ matrix.service }} derle ve test et
+        run: mvn -B clean verify --file ${{ matrix.service }}/pom.xml
