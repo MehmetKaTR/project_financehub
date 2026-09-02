@@ -12,6 +12,7 @@ import com.mehmetkatr.account_service.repository.OutboxRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.ObjectProvider;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -25,6 +26,8 @@ public class BankAccountCommandService {
     private final BankAccountMapper bankAccountMapper;
     //private final ApplicationEventPublisher eventPublisher;
     private final OutboxRepository outboxRepository;
+
+    private final ObjectProvider<BankAccountCommandService> selfProvider;
 
     @Transactional
     public BankAccountResponse createBankAccount(Long userId, String bankName, String bankAccountNumber, String iban, Money balance, BankAccount.AccountType type){
@@ -103,7 +106,7 @@ public class BankAccountCommandService {
 
     @Transactional
     public BankAccountResponse withdrawForApi(Long accountId, BigDecimal amount) {
-        return bankAccountMapper.toResponse(withdraw(accountId, amount));
+        return bankAccountMapper.toResponse(selfProvider.getObject().withdraw(accountId, amount));
     }
 
     private void writeToOutbox(Long accountId) {
