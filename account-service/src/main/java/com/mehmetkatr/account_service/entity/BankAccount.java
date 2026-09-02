@@ -5,6 +5,8 @@ import com.mehmetkatr.account_service.entity.base.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -15,6 +17,8 @@ import java.math.BigDecimal;
 @Table(name = "bank_accounts", indexes = {
         @Index(name = "idx_bank_accounts_user_id", columnList = "user_id")
 })
+@SQLDelete(sql = "UPDATE bank_accounts SET deleted = true WHERE id = ?")
+@SQLRestriction("deleted = false") // HasQueryFilter : sadece false olanlar gelecek
 public class BankAccount extends BaseEntity {
 
     @Id
@@ -48,6 +52,9 @@ public class BankAccount extends BaseEntity {
 
     @Column(name = "is_active")
     private boolean isActive = true;
+
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
 
     public void deposit(Money amount){
         if (!this.isActive) throw new RuntimeException("Bank account is not active");

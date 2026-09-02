@@ -109,6 +109,13 @@ public class BankAccountCommandService {
         return bankAccountMapper.toResponse(selfProvider.getObject().withdraw(accountId, amount));
     }
 
+    @Transactional
+    public void deleteBankAccount(Long id) {
+        BankAccount account = bankAccountRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Bank account not found"));
+        bankAccountRepository.delete(account);   // @SQLDelete → deleted=true
+        writeToOutbox(id);                        // ← read model senkronu için event bırak
+    }
     private void writeToOutbox(Long accountId) {
         outboxRepository.save(OutboxEvent.builder()
                 .aggregateType("BankAccount")

@@ -28,7 +28,10 @@ public class OutboxProcessor {
 
         for (OutboxEvent event : pending) {
             bankAccountRepository.findById(event.getAggregateId())
-                    .ifPresent(account -> readRepository.save(bankAccountMapper.toReadModel(account)));
+                    .ifPresentOrElse(
+                            account -> readRepository.save(bankAccountMapper.toReadModel(account)),  // VAR → güncelle
+                            () -> readRepository.deleteById(event.getAggregateId())                   // YOK → read model'den sil
+                    );
             event.setProcessed(true);
             outboxRepository.save(event);
         }

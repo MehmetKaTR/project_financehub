@@ -1,0 +1,1 @@
+ALTER TABLE bank_accounts ADD (deleted BOOLEAN DEFAULT FALSE NOT NULL);

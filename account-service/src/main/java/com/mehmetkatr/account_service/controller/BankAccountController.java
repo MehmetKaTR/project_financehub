@@ -68,4 +68,10 @@ public class BankAccountController {
     public ResponseEntity<BankAccountResponse> deactivateBankAccount(@PathVariable Long id){
         return ResponseEntity.ok(bankAccountCommandService.deactivateAccount(id));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteBankAccount(@PathVariable Long id){
+        bankAccountCommandService.deleteBankAccount(id);
+        return ResponseEntity.noContent().build();   // 204 No Content
+    }
 }
