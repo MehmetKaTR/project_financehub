@@ -27,6 +27,8 @@ public class BankAccountCommandService {
     //private final ApplicationEventPublisher eventPublisher;
     private final OutboxRepository outboxRepository;
 
+    private static final String ERROR_KEY = "Bank Account not found";
+
     private final ObjectProvider<BankAccountCommandService> selfProvider;
 
     @Transactional
@@ -54,7 +56,7 @@ public class BankAccountCommandService {
 
     @Transactional
     public BankAccountResponse activateAccount(Long id){
-        BankAccount currentBankAccount = bankAccountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Bank Account not found"));
+        BankAccount currentBankAccount = bankAccountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(ERROR_KEY));
 
         if(!currentBankAccount.isActive())
             currentBankAccount.setActive(true);
@@ -67,7 +69,7 @@ public class BankAccountCommandService {
 
     @Transactional
     public BankAccountResponse deactivateAccount(Long id){
-        BankAccount currentBankAccount = bankAccountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Bank Account not found"));
+        BankAccount currentBankAccount = bankAccountRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(ERROR_KEY));
 
         if(currentBankAccount.isActive())
             currentBankAccount.setActive(false);
@@ -80,7 +82,7 @@ public class BankAccountCommandService {
 
     @Transactional
     public BankAccountResponse deposit(Long accountId, BigDecimal amount){
-        BankAccount account = bankAccountRepository.findById(accountId).orElseThrow(() -> new ResourceNotFoundException("Bank account not found"));
+        BankAccount account = bankAccountRepository.findById(accountId).orElseThrow(() -> new ResourceNotFoundException(ERROR_KEY));
 
         Money balance = new Money(amount, account.getBalance().getCurrency());
         account.deposit(balance);
@@ -93,7 +95,7 @@ public class BankAccountCommandService {
 
     @Transactional
     public BankAccount withdraw(Long accountId, BigDecimal amount){
-        BankAccount account = bankAccountRepository.findById(accountId).orElseThrow(()-> new ResourceNotFoundException("Bank account not found"));
+        BankAccount account = bankAccountRepository.findById(accountId).orElseThrow(()-> new ResourceNotFoundException(ERROR_KEY));
 
         Money balance = new Money(amount, account.getBalance().getCurrency());
         account.withdraw(balance);
@@ -112,7 +114,7 @@ public class BankAccountCommandService {
     @Transactional
     public void deleteBankAccount(Long id) {
         BankAccount account = bankAccountRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Bank account not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(ERROR_KEY));
         bankAccountRepository.delete(account);   // @SQLDelete → deleted=true
         writeToOutbox(id);                        // ← read model senkronu için event bırak
     }

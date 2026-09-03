@@ -78,6 +78,7 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       SPRING_KAFKA_BOOTSTRAPSERVERS: kafka:9092
       MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT: http://jaeger:4318/v1/traces
+      SPRING_CLOUD_VAULT_URI: http://vault:8200
     depends_on:
       eureka-server:
         condition: service_started
@@ -86,6 +87,8 @@ services:
       redis:
         condition: service_started
       kafka:
+        condition: service_started
+      vault:
         condition: service_started
     networks:
       - financehub-net
@@ -153,6 +156,19 @@ services:
       - "4318:4318"        # OTLP HTTP (servisler span'leri buraya gönderir)
     environment:
       COLLECTOR_OTLP_ENABLED: "true"    # OTLP alımını aç
+    networks:
+      - financehub-net
+
+  # ---------- VAULT (secrets yönetimi) ----------
+  vault:
+    image: hashicorp/vault:latest
+    ports:
+      - "8200:8200"                          # Vault UI + API: http://localhost:8200
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: root          # dev root token (giriş anahtarı)
+      VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
+    cap_add:
+      - IPC_LOCK                             # Vault belleği diske yazılmasın (güvenlik)
     networks:
       - financehub-net
 
