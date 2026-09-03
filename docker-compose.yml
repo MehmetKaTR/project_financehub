@@ -59,12 +59,15 @@ services:
       SPRING_DATASOURCE_URL: jdbc:oracle:thin:@oracle:1521/FREEPDB1
       SPRING_DATA_REDIS_HOST: redis          # cache backend (localhost -> redis container)
       MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT: http://jaeger:4318/v1/traces
+      SPRING_CLOUD_VAULT_URI: http://vault:8200
     depends_on:
       eureka-server:
         condition: service_started
       oracle:
         condition: service_healthy
       redis:
+        condition: service_started
+      vault:
         condition: service_started
     networks:
       - financehub-net
@@ -101,12 +104,15 @@ services:
       SPRING_DATASOURCE_URL: jdbc:oracle:thin:@oracle:1521/FREEPDB1
       SPRING_KAFKA_BOOTSTRAPSERVERS: kafka:9092
       MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT: http://jaeger:4318/v1/traces
+      SPRING_CLOUD_VAULT_URI: http://vault:8200
     depends_on:
       eureka-server:
         condition: service_started
       oracle:
         condition: service_healthy
       kafka:
+        condition: service_started
+      vault:
         condition: service_started
     networks:
       - financehub-net
